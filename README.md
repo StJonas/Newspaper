@@ -1,6 +1,6 @@
 # Newspaper
 
-##Running without docker compose
+## Running without docker compose
 npm install ..
 backend:
 install express, mysql and cors
