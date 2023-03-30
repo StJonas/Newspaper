@@ -13,4 +13,4 @@ Ports: Frontend: 3000 - Backend: 8080
 
 ## Running with Docker compose
 cd to the root folder. 
-Docker compose -f mysql.yaml up
+Docker compose -f docker-compose.yaml up
