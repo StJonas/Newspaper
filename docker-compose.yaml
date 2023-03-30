@@ -4,20 +4,13 @@ services:
   mysql_db:
     image: mysql:8.0
     restart: always
-    container_name: newspaper_mysql
-    cap_add:
-      - SYS_NICE
-    volumes:
-      - "./setup.sql:/docker-entrypoint-initdb.d/setup.sql"
     ports:
       - "7201:3306"
+    volumes:
+      - ./db/data:/var/lib/mysql
     environment:
-      # MYSQL_HOST_IP: localhost
       MYSQL_DATABASE: Newspaper
-      # MYSQL_USER: MYSQL_USER
-      # MYSQL_PASSWORD: password
-      MYSQL_ROOT_PASSWORD: MYSQL_ROOT_PASSWORD
-      # MYSQL_HOST: localhost
+      MYSQL_ROOT_PASSWORD: password
 
   backend:
     build:
@@ -26,10 +19,10 @@ services:
     depends_on:
       - mysql_db
     volumes:
-      - /backend/node_modules
+      - ./backend/data:/app/data
       - ./server:/app
-    expose:
-      - 8080
+    ports:
+      - "8080:8080"
     environment:
       MYSQL_DATABASE: Newspaper
       MYSQL_USER: root
@@ -37,12 +30,11 @@ services:
       MYSQL_HOST: mysql_db
 
   client:
-    stdin_open: true
-    environment:
-      - CHOKIDAR_USEPOLLING=true
     build:
       dockerfile: Dockerfile
       context: ./client
+    ports:
+      - "3000:3000"
     volumes:
       - /client/node_modules
       - ./client:/app
