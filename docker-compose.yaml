@@ -19,8 +19,9 @@ services:
     depends_on:
       - mysql_db
     volumes:
-      - ./backend/data:/app/data
-      - ./server:/app
+      - ./backend:/app
+      - /backend/node_modules
+      - ./backend/package.json:/app/package.json
     ports:
       - "8080:8080"
     environment:
