@@ -30,15 +30,15 @@ services:
       MYSQL_PASSWORD: password
       MYSQL_HOST: mysql_db
 
-  client:
+  frontend:
     build:
       dockerfile: Dockerfile
-      context: ./client
+      context: ./frontend
     ports:
       - "3000:3000"
     volumes:
-      - /client/node_modules
-      - ./client:/app
+      - /frontend/node_modules
+      - ./frontend:/app
 
 volumes:
   my-db:
