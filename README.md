@@ -13,4 +13,4 @@ Ports: Frontend: 3000 - Backend: 8080
 
 ## Running with Docker compose
 cd to the root folder. 
-Docker compose -f docker-compose.yaml up
+docker-compose -f docker-compose.yaml up
