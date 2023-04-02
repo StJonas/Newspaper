@@ -1,44 +1,43 @@
-version: '3.8'
+version: "3"
 
 services:
-  mysql_db:
-    image: mysql:8.0
-    restart: always
-    ports:
-      - "7201:3306"
-    volumes:
-      - ./db/data:/var/lib/mysql
-    environment:
-      MYSQL_DATABASE: Newspaper
-      MYSQL_ROOT_PASSWORD: password
-
-  backend:
-    build:
-      dockerfile: Dockerfile
-      context: "./backend"
-    depends_on:
-      - mysql_db
-    volumes:
-      - ./backend:/app
-      - /backend/node_modules
-      - ./backend/package.json:/app/package.json
-    ports:
-      - "8080:8080"
-    environment:
-      MYSQL_DATABASE: Newspaper
-      MYSQL_USER: root
-      MYSQL_PASSWORD: password
-      MYSQL_HOST: mysql_db
-
-  client:
-    build:
-      dockerfile: Dockerfile
-      context: ./client
+  frontend:
+    build: ./frontend
     ports:
       - "3000:3000"
-    volumes:
-      - /client/node_modules
-      - ./client:/app
+    depends_on:
+      - backend
+    networks:
+      - my_network
 
-volumes:
-  my-db:
+  backend:
+    build: ./backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql_db
+    environment:
+      DB_HOST: mysql_db
+      MYSQL_USER: root
+      MYSQL_ROOT_PASSWORD: password
+      DB_NAME: Newspaper
+    networks:
+      - my_network
+    volumes:
+      - ./backend/data:/app/data
+
+  mysql_db:
+    image: mysql:latest
+    environment:
+      DB_HOST: mysql_db
+      MYSQL_DATABASE: Newspaper
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "7201:3306"
+    networks:
+      - my_network
+    volumes:
+      - ./mysql_db/data:/var/lib/mysql
+
+networks:
+  my_network:
