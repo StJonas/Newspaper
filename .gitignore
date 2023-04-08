@@ -106,3 +106,5 @@ dist
 # other stuff
 .DS_Store
 /db
+/.idea
+/mysql/data
