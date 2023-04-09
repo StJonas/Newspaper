@@ -21,7 +21,7 @@ create table user_follow
 
 create table journalist
 (
-    employee_id int auto_increment,
+    employee_id int,
     user_id     int,
     first_name  varchar(50) not null,
     last_name   varchar(50) not null,
@@ -39,7 +39,7 @@ create table article
     subtitle        varchar(750)                        not null,
     article_content text                                not null,
     primary key (article_id),
-    foreign key (journalist_id) references journalist (user_id) on delete set null
+    foreign key (journalist_id) references journalist (employee_id) on delete set null
 );
 
 create table comment
