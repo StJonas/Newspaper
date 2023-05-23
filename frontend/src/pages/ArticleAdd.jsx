@@ -4,7 +4,7 @@ import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 
 const ArticleAdd = () => {
-    const postArticleUrl = "http://localhost:8080/articles";
+    const postArticleUrl = "https://localhost:8080/articles";
     const [article, setArticle] = useState({
         title: "",
         desc: "",

@@ -6,7 +6,7 @@ import axios from 'axios';
 
 const Articles = () => {
     const [articles, setArticles] = useState([]);
-    const link = "http://localhost:8080/articles/";
+    const link = "https://localhost:8080/articles/";
 
     useEffect(() => {
         const fetchAllArticles = async () => {

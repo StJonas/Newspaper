@@ -8,7 +8,7 @@ import {useEffect} from 'react';
 const ArticleUpdate = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const articleUpdateUrl = "http://localhost:8080/articles/";
+    const articleUpdateUrl = "https://localhost:8080/articles/";
     const articleId = location.pathname.split("/")[2];
     const [newArticle, setNewArticle] = useState({
         title: "",
@@ -24,14 +24,12 @@ const ArticleUpdate = () => {
             try {
                 const res = await axios.get(articleUpdateUrl + articleId);
                 await setArticle(res.data[0]);
-                await console.log(res.data[0]);
-                await console.log(article);
             } catch (error) {
                 console.log(error);
             }
         }
         fetchArticle();
-    }, [articleId]);
+    },[articleId]);
 
     const handleChange = (e) => {
         setNewArticle((prev) => ({...prev, [e.target.name]: e.target.value}));
