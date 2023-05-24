@@ -16,5 +16,6 @@ Frontend: 3000 </br>
 Backend: http:1080 (redirects to https); https:1443 
 
 ## Running with Docker compose
-cd to the root folder.
-docker-compose -f docker-compose.yaml up
+cd to the root folder. </br>
+docker-compose build </br>
+docker-compose up

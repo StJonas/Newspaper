@@ -17,8 +17,8 @@ RUN dos2unix ./*/*
 FROM nginx:stable-alpine
 COPY nginx/default.conf  /etc/nginx/conf.d/default.conf
 COPY --from=build --chown=nginx:nginx  /frontend/build  /usr/share/nginx/html
-COPY --from=build --chown=nginx:nginx  /frontend/.cert/certificate.pem  /etc/nginx/certificate.pem
-COPY --from=build --chown=nginx:nginx  /frontend/.cert/key.pem  /etc/nginx/key.pem
+COPY --from=build --chown=nginx:nginx  /frontend/certificate/certificate.pem  /etc/nginx/certificate.pem
+COPY --from=build --chown=nginx:nginx  /frontend/certificate/key.pem  /etc/nginx/key.pem
 EXPOSE 80
 EXPOSE 443
 
