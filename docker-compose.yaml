@@ -13,14 +13,18 @@ services:
   backend:
     build: ./backend
     ports:
-      - "8080:8080"
+      - "1080:1080"
+      - "1443:1443"
     depends_on:
       - mysql
     environment:
       MYSQL_HOST: mysql
-      DATABASE_NAME: newspaper
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: newspaper
       MYSQL_USERNAME: user
       MYSQL_PASSWORD: password
+      HTTPS_PORT: 1443
+      HTTP_PORT: 1080
     networks:
       - frontend_backend
       - backend_mysql

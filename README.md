@@ -1,16 +1,20 @@
 # Newspaper
 
-## Running without Docker compose
-npm install ..   
-backend:
-install express, mysql and cors
+## Running backend and frontend without Docker compose 
+We still need docker container for mysql. 
+
+backend: </br>
+npm install </br>
+npm deploy (or npm start (for development))
 
 client:
-install react and react-router-dom
-
-Backend and frontend can be started with npm start. 
-Ports: Frontend: 3000 - Backend: 8080
+npm install </br>
+npm start
+ 
+Ports: </br>
+Frontend: 3000 </br>
+Backend: http:1080 https:1443
 
 ## Running with Docker compose
 cd to the root folder.
-docker-compose -f docker-compose.yaml up -d
+docker-compose -f docker-compose.yaml up

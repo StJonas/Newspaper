@@ -2,9 +2,9 @@ import axios from 'axios';
 import React from 'react';
 import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
+import {ARTICLES_LINK} from "../constants";
 
 const ArticleAdd = () => {
-    const postArticleUrl = "https://localhost:8080/articles";
     const [article, setArticle] = useState({
         title: "",
         desc: "",
@@ -21,7 +21,7 @@ const ArticleAdd = () => {
     const handleClick = async e => {
         e.preventDefault();
         try {
-            await axios.post(postArticleUrl, article);
+            await axios.post(ARTICLES_LINK, article);
             navigate("/");
         } catch (error) {
             console.log(error);

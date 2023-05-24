@@ -2,49 +2,46 @@ import express from "express";
 import mysql from "mysql2";
 import cors from "cors";
 import https from "https";
+import http from "http";
 import fs from "fs";
-
-const backendPort = 8080;
-const sslCertificateAndKey = {
-    key: fs.readFileSync('.cert/key.pem'),
-    cert: fs.readFileSync('.cert/certificate.pem')
-};
+import {env} from "./.env/envConfig.js";
 
 const app = express();
 app.use(express.json());
 app.use(cors());
-const server = https.createServer(sslCertificateAndKey, app);
 
+const dbConfig = {
+    host: env.MYSQL_HOST,
+    port: env.MYSQL_PORT,
+    user: env.MYSQL_USERNAME,
+    password: env.MYSQL_PASSWORD,
+    database: env.MYSQL_DATABASE,
+};
+const db = mysql.createPool(dbConfig);
 
-// Redirect HTTP to HTTPS
+const backendHttpPort = env.HTTP_PORT;
+const backendHttpsPort = env.HTTPS_PORT;
+const sslCertificateAndKey = {
+    key: fs.readFileSync('.cert/key.pem'),
+    cert: fs.readFileSync('.cert/certificate.pem')
+};
+const httpServer = http.createServer(app);
+const httpsServer = https.createServer(sslCertificateAndKey, app);
+
+httpServer.listen(backendHttpPort, () => {
+    console.log(`Connected to backend over HTTP on port ${backendHttpPort}. Will be redirected to HTTPS.`);
+});
+httpsServer.listen(backendHttpsPort, () => {
+    console.log(`Connected to backend over HTTPS on port ${backendHttpsPort}`);
+});
+
 app.use((req, res, next) => {
     if (req.protocol === "http") {
-        const httpsUrl = `https://${req.hostname}${req.originalUrl}`;
+        const httpsUrl = `https://${req.hostname}:${backendHttpsPort}${req.originalUrl}`;
         return res.redirect(301, httpsUrl);
     }
     next();
 });
-
-let dbConfig;
-if (process.env.NODE_ENV === 'docker') {
-    // Docker container
-    dbConfig = {
-        host: 'mysql',
-        user: 'root',
-        password: 'password',
-        database: 'newspaper',
-    };
-} else {
-    // Local development
-    dbConfig = {
-        host: 'localhost',
-        port: '7201',
-        user: 'root',
-        password: 'password',
-        database: 'newspaper',
-    };
-}
-const db = mysql.createPool(dbConfig);
 
 app.get("/articles", (req, res) => {
     const selectQuery = "SELECT * FROM newspaper.article";
@@ -97,11 +94,6 @@ app.put("/articles/:articleId", (req, res) => {
 
 app.get("/", (req, res) => {
     res.json("Hello, this is the backend!");
-});
-
-
-server.listen(backendPort, () => {
-    console.log(`Connected to backend over HTTPS on port ${backendPort}`);
 });
 
 //TODO: save DB inside a Docker Volume

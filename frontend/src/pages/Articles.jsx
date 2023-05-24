@@ -3,15 +3,15 @@ import {useEffect} from 'react';
 import {useState} from 'react';
 import {Link} from 'react-router-dom';
 import axios from 'axios';
+import {ARTICLES_LINK} from "../constants";
 
 const Articles = () => {
     const [articles, setArticles] = useState([]);
-    const link = "https://localhost:8080/articles/";
 
     useEffect(() => {
         const fetchAllArticles = async () => {
             try {
-                const res = await axios.get(link);
+                const res = await axios.get(ARTICLES_LINK);
                 console.log(res);
                 setArticles(res.data);
             } catch (error) {
@@ -23,7 +23,7 @@ const Articles = () => {
 
     const handleDelete = async (article_id) => {
         try {
-            await axios.delete(link + article_id);
+            await axios.delete(ARTICLES_LINK + article_id);
             window.location.reload();
         } catch (error) {
             console.log(error);

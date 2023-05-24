@@ -4,11 +4,11 @@ import {useState} from 'react';
 import {useLocation, useNavigate} from 'react-router-dom';
 import {Link} from 'react-router-dom';
 import {useEffect} from 'react';
+import {ARTICLES_LINK} from "../constants";
 
 const ArticleUpdate = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const articleUpdateUrl = "https://localhost:8080/articles/";
     const articleId = location.pathname.split("/")[2];
     const [newArticle, setNewArticle] = useState({
         title: "",
@@ -22,7 +22,7 @@ const ArticleUpdate = () => {
 
         const fetchArticle = async () => {
             try {
-                const res = await axios.get(articleUpdateUrl + articleId);
+                const res = await axios.get(ARTICLES_LINK + articleId);
                 await setArticle(res.data[0]);
             } catch (error) {
                 console.log(error);
@@ -38,7 +38,7 @@ const ArticleUpdate = () => {
     const handleClick = async (e) => {
         e.preventDefault();
         try {
-            await axios.put(articleUpdateUrl + articleId, newArticle);
+            await axios.put(ARTICLES_LINK + articleId, newArticle);
             navigate("/");
         } catch (err) {
             console.log(err);
