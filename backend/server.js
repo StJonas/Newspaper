@@ -96,9 +96,9 @@ app.get("/", (req, res) => {
     res.json("Hello, this is the backend!");
 });
 
-//TODO: save DB inside a Docker Volume
 //TODO: configure a deployment server for react app
-//TODO: switch to Bootstrap
+//TODO: configure environment variables (backend port usw.) for frontend
+//TODO: switch to Bootstrap only (no other css)
 //TODO: ORM: Mongoose, Sequelize
 //TODO: HealthChecks for Database
 //TODO: Use Cases

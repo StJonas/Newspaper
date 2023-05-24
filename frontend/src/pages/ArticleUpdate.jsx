@@ -2,9 +2,11 @@ import axios from 'axios';
 import React from 'react';
 import {useState} from 'react';
 import {useLocation, useNavigate} from 'react-router-dom';
-import {Link} from 'react-router-dom';
 import {useEffect} from 'react';
 import {ARTICLES_LINK} from "../constants";
+import UpdateButton from "../components/UpdateButton";
+import {H2} from "../components/Headings";
+import AppLink from "../components/AppLink";
 
 const ArticleUpdate = () => {
     const navigate = useNavigate();
@@ -29,7 +31,7 @@ const ArticleUpdate = () => {
             }
         }
         fetchArticle();
-    },[articleId]);
+    }, [articleId]);
 
     const handleChange = (e) => {
         setNewArticle((prev) => ({...prev, [e.target.name]: e.target.value}));
@@ -46,13 +48,13 @@ const ArticleUpdate = () => {
     };
 
     return (
-        <div className='form'>
-            <h1>Update article</h1>
-            <input type="text" placeholder={article['title']} onChange={handleChange} name="title" />
-            <input type="text" placeholder={article['subtitle']} onChange={handleChange} name="subtitle" />
-            <input type="text" placeholder={article['article_content']} onChange={handleChange} name="article_content" />
-            <button onClick={handleClick}>Update</button>
-            <Link className='back-link' to="/">Go back</Link>
+        <div className={"flex flex-col gap-3 pt-5"}>
+            <H2>Update article</H2>
+            <input type="text" placeholder={article['title']} onChange={handleChange} name="title"/>
+            <input type="text" placeholder={article['subtitle']} onChange={handleChange} name="subtitle"/>
+            <input type="text" placeholder={article['article_content']} onChange={handleChange} name="article_content"/>
+            <div><UpdateButton onClick={handleClick}>Update</UpdateButton></div>
+            <AppLink to="/">Go back</AppLink>
         </div>
     );
 

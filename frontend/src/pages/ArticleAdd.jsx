@@ -3,6 +3,9 @@ import React from 'react';
 import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {ARTICLES_LINK} from "../constants";
+import AppContainer from "../components/AppContainer";
+import AppButton from "../components/AppButton";
+import {H3} from "../components/Headings";
 
 const ArticleAdd = () => {
     const [article, setArticle] = useState({
@@ -29,13 +32,13 @@ const ArticleAdd = () => {
     };
 
     return (
-        <div className='form'>
-            <h1>Add new article</h1>
+        <AppContainer classes={"flex flex-col gap-10"}>
+            <H3>Add new article</H3>
             <input type="text" placeholder="Title" onChange={handleChange} name="title"/>
             <input type="text" placeholder="Subtitle" onChange={handleChange} name="subtitle"/>
             <input type="text" placeholder="content" onChange={handleChange} name="article_content"/>
-            <button onClick={handleClick}>Add</button>
-        </div>
+            <div className={"lx-2"}><AppButton onClick={handleClick}>Add</AppButton></div>
+        </AppContainer>
     );
 };
 

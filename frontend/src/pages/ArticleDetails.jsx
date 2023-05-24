@@ -1,11 +1,11 @@
 import React from 'react';
-import {Link} from 'react-router-dom';
+import AppLink from "../components/AppLink";
 
 const ArticleDetails = () => {
     return (
         <div>
             <h1>ArticleDetails</h1>
-            <Link className='back-link' to="/">Go back</Link>
+            <AppLink to={"/"}>Go back</AppLink>
         </div>
     );
 };

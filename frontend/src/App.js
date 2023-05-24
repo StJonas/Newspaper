@@ -1,23 +1,17 @@
 import {BrowserRouter, Routes, Route} from "react-router-dom";
-import "./styles/App.css";
 import Articles from "./pages/Articles";
 import ArticleDetails from "./pages/ArticleDetails";
 import ArticleUpdate from "./pages/ArticleUpdate";
 import ArticleAdd from "./pages/ArticleAdd";
 import React from "react";
-
-function Button() {
-    return null;
-}
+import AppContainer from "./components/AppContainer";
+import {H1, H2} from "./components/Headings";
 
 function App() {
     return (
-        <div className="App">
-            <h1>Newspaper</h1> {/* todo: link */}
-            <h2>navbar</h2> {/* todo: navbar */}
-            <div>
-                <Button>Test</Button>
-            </div>
+        <AppContainer>
+            <H1>Newspaper</H1> {/* todo: link */}
+            <H2>navbar</H2> {/* todo: navbar */}
             <BrowserRouter>
                 <Routes>
                     <Route path="/" element={<Articles/>}/>
@@ -26,7 +20,7 @@ function App() {
                     <Route path="/details/:id" element={<ArticleDetails/>}/>
                 </Routes>
             </BrowserRouter>
-        </div>
+        </AppContainer>
     );
 }
 

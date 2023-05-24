@@ -4,8 +4,15 @@ import {useState} from 'react';
 import {Link} from 'react-router-dom';
 import axios from 'axios';
 import {ARTICLES_LINK} from "../constants";
+import {useNavigate} from 'react-router-dom';
+import UpdateButton from "../components/UpdateButton";
+import DeleteButton from "../components/DeleteButton";
+import AppButton from "../components/AppButton";
+import {H2, H3} from "../components/Headings";
+import ArticleContainer from "../components/ArticleContainer";
 
 const Articles = () => {
+    const navigate = useNavigate();
     const [articles, setArticles] = useState([]);
 
     useEffect(() => {
@@ -21,7 +28,7 @@ const Articles = () => {
         fetchAllArticles();
     }, []);
 
-    const handleDelete = async (article_id) => {
+    const handleClickDelete = async (article_id) => {
         try {
             await axios.delete(ARTICLES_LINK + article_id);
             window.location.reload();
@@ -30,24 +37,33 @@ const Articles = () => {
         }
     };
 
+
+    const navigateTo = (goal) => {
+        navigate(goal);
+    };
+
+
     return (
-        <div>
-            <div className='articles'>
-                {articles.map((article) => (
-                    <div className='article' key={article['article_id']}>
-                        <h2><Link className='link' to={`/details/${article['article_id']}`}>{article['title']}</Link></h2>
-                        <p>{article['subtitle']}</p>
-                        <span>{article['publish_time']}</span>
-                        <p>{article['article_content']}</p>
-                        <button className='update'>
-                            <Link className='update-link' to={`/update/${article['article_id']}`}>Update</Link>
-                        </button>
-                        <button className='delete' onClick={() => handleDelete(article['article_id'])}>Delete</button>
+        <div className={"pt-4"}>
+            <div> {articles.map((article) => (
+                <ArticleContainer key={article['article_id']}>
+                    <H2><Link to={`/details/${article['article_id']}`}>
+                        {article['title']}
+                    </Link></H2>
+                    <H3>{article['subtitle']}</H3>
+                    <span>{article['publish_time']}</span>
+                    <p>{article['article_content']}</p>
+                    <div>
+                        <UpdateButton
+                            onClick={() => navigateTo(`/update/${article['article_id']}`)}>Update</UpdateButton>
+                        <DeleteButton onClick={() => handleClickDelete(article['article_id'])}>Delete</DeleteButton>
                     </div>
-                ))}
-            </div>
+                </ArticleContainer>
+            ))}</div>
             <br/>
-            <button className='add-button'><Link className='link' to="/add">Add new article</Link></button>
+            <AppButton onClick={() => {
+                navigateTo(`/add`)
+            }}>Add Article</AppButton>
         </div>
     );
 };
