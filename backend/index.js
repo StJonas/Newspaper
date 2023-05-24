@@ -32,7 +32,7 @@ if (process.env.NODE_ENV === 'docker') {
         host: 'mysql',
         user: 'root',
         password: 'password',
-        database: 'Newspaper',
+        database: 'newspaper',
     };
 } else {
     // Local development
@@ -41,7 +41,7 @@ if (process.env.NODE_ENV === 'docker') {
         port: '7201',
         user: 'root',
         password: 'password',
-        database: 'Newspaper',
+        database: 'newspaper',
     };
 }
 const db = mysql.createPool(dbConfig);
@@ -103,3 +103,12 @@ app.get("/", (req, res) => {
 server.listen(backendPort, () => {
     console.log(`Connected to backend over HTTPS on port ${backendPort}`);
 });
+
+//TODO: save DB inside a Docker Volume
+//TODO: configure a deployment server for react app
+//TODO: switch to Bootstrap
+//TODO: ORM: Mongoose, Sequelize
+//TODO: HealthChecks for Database
+//TODO: Use Cases
+//TODO: Reports
+//TODO: Handle Error on homepage if no articles available

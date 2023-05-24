@@ -40,7 +40,10 @@ services:
       - backend_mysql
     volumes:
       - ./mysql/scripts:/docker-entrypoint-initdb.d
-      - ./mysql/data:/var/lib/mysql
+      - mysqldb:/var/lib/mysql
+
+volumes:
+  mysqldb:
 
 networks:
   backend_mysql:
