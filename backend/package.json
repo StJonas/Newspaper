@@ -1,7 +1,7 @@
 {
     "name": "backend",
     "version": "1.0.0",
-    "description": "",
+    "description": "express.js server for database API",
     "main": "server.js",
     "type": "module",
     "scripts": {

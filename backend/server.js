@@ -4,7 +4,7 @@ import cors from "cors";
 import https from "https";
 import http from "http";
 import fs from "fs";
-import {env} from "./.env/envConfig.js";
+import {env} from "./env/envConfig.js";
 
 const app = express();
 app.use(express.json());
@@ -22,8 +22,8 @@ const db = mysql.createPool(dbConfig);
 const backendHttpPort = env.HTTP_PORT;
 const backendHttpsPort = env.HTTPS_PORT;
 const sslCertificateAndKey = {
-    key: fs.readFileSync('.cert/key.pem'),
-    cert: fs.readFileSync('.cert/certificate.pem')
+    key: fs.readFileSync('certificate/key.pem'),
+    cert: fs.readFileSync('certificate/certificate.pem')
 };
 const httpServer = http.createServer(app);
 const httpsServer = https.createServer(sslCertificateAndKey, app);
@@ -96,9 +96,8 @@ app.get("/", (req, res) => {
     res.json("Hello, this is the backend!");
 });
 
-//TODO: configure a deployment server for react app
+//TODO: check nginx setting
 //TODO: configure environment variables (backend port usw.) for frontend
-//TODO: switch to Bootstrap only (no other css)
 //TODO: ORM: Mongoose, Sequelize
 //TODO: HealthChecks for Database
 //TODO: Use Cases
