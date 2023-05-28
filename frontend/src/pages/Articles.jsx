@@ -3,12 +3,11 @@ import {useEffect} from 'react';
 import {useState} from 'react';
 import {Link} from 'react-router-dom';
 import axios from 'axios';
-import {ARTICLES_LINK} from "../constants";
+import {ARTICLES_LINK} from "../assets/constants";
 import {useNavigate} from 'react-router-dom';
 import UpdateButton from "../components/UpdateButton";
 import DeleteButton from "../components/DeleteButton";
-import AppButton from "../components/AppButton";
-import {H2, H3} from "../components/Headings";
+import {H2, H3} from "../components/Typography";
 import ArticleContainer from "../components/ArticleContainer";
 
 const Articles = () => {
@@ -19,7 +18,6 @@ const Articles = () => {
         const fetchAllArticles = async () => {
             try {
                 const res = await axios.get(ARTICLES_LINK);
-                console.log(res);
                 setArticles(res.data);
             } catch (error) {
                 console.log(error);
@@ -61,9 +59,6 @@ const Articles = () => {
                 </ArticleContainer>
             ))}</div>
             <br/>
-            <AppButton onClick={() => {
-                navigateTo(`/add`)
-            }}>Add Article</AppButton>
         </div>
     );
 };

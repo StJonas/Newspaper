@@ -5,14 +5,17 @@ import https from "https";
 import http from "http";
 import fs from "fs";
 import {env} from "./env/envConfig.js";
+import {importData} from "./database/importData.js";
+import createDatabaseCon from "./database/databaseCon.js";
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
+const database = createDatabaseCon();
 const dbConfig = {
     host: env.MYSQL_HOST,
-    port: env.MYSQL_PORT,
+    port: parseInt(env.MYSQL_PORT,10),
     user: env.MYSQL_USERNAME,
     password: env.MYSQL_PASSWORD,
     database: env.MYSQL_DATABASE,
@@ -92,9 +95,40 @@ app.put("/articles/:articleId", (req, res) => {
     });
 });
 
+app.post("/importData", async (req, res) => {
+    try {
+        await importData();
+        res.status(200).json({ message: "Data imported successfully" });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Error importing data" });
+    }
+});
+
+app.get("/users", async (req, res) => {
+    try {
+        const users  = await database.user.findAll({
+            attributes: ["user_id", "username"],
+        });
+
+        const retUsers = users.map((user) => ({
+            id: user['user_id'],
+            username: user['username'],
+        }));
+
+        return res.json(retUsers);
+    } catch (error) {
+        console.error("Error retrieving users:", error);
+        return res.json(error);
+    }
+});
+
 app.get("/", (req, res) => {
     res.json("Hello, this is the backend!");
 });
+
+
+
 
 //TODO: check nginx setting
 //TODO: configure environment variables (backend port usw.) for frontend

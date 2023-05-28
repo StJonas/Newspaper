@@ -3,9 +3,9 @@ import React from 'react';
 import {useState} from 'react';
 import {useLocation, useNavigate} from 'react-router-dom';
 import {useEffect} from 'react';
-import {ARTICLES_LINK} from "../constants";
+import {ARTICLES_LINK} from "../assets/constants";
 import UpdateButton from "../components/UpdateButton";
-import {H2} from "../components/Headings";
+import {H2} from "../components/Typography";
 import AppLink from "../components/AppLink";
 
 const ArticleUpdate = () => {

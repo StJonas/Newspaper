@@ -2,10 +2,10 @@ import axios from 'axios';
 import React from 'react';
 import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {ARTICLES_LINK} from "../constants";
+import {ARTICLES_LINK} from "../assets/constants";
 import AppContainer from "../components/AppContainer";
 import AppButton from "../components/AppButton";
-import {H3} from "../components/Headings";
+import {H3} from "../components/Typography";
 
 const ArticleAdd = () => {
     const [article, setArticle] = useState({
