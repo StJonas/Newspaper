@@ -1,4 +1,4 @@
-import {BrowserRouter, Routes, Route} from "react-router-dom";
+import {BrowserRouter, Routes, Route, Link} from "react-router-dom";
 import Articles from "./pages/Articles";
 import ArticleDetails from "./pages/ArticleDetails";
 import ArticleUpdate from "./pages/ArticleUpdate";
@@ -7,12 +7,11 @@ import Reports from "./pages/Reports";
 import React, {useEffect, useState} from "react";
 import AppContainer from "./components/AppContainer";
 import {H1, Text} from "./components/Typography";
-import HomepageBar from "./components/HomepageBar";
 import AppButton from "./components/AppButton";
 import {IMPORT_DATA_LINK, USERS_LINK} from "./assets/constants";
 import axios from "axios";
 import UserList from "./components/UserList";
-import {Navbar} from "flowbite-react";
+import {Navbar, Spinner} from "flowbite-react";
 import {useDispatch} from "react-redux";
 import {login} from './assets/loggedInUserSlice';
 import {useSelector} from "react-redux";
@@ -29,23 +28,24 @@ function App() {
             setLoading(true);
             await axios.post(IMPORT_DATA_LINK);
             setLoading(false);
+            await fetchAllUsers();
         } catch (error) {
             setLoading(false);
             console.log("error:", error);
         }
     };
 
+    const fetchAllUsers = async () => {
+        try {
+            const allUsers = await axios.get(USERS_LINK);
+            setUsers(allUsers.data);
+            setUsersLoaded(true);
+        } catch (error) {
+            console.log("error while loading users:", error);
+        }
+    };
 
     useEffect(() => {
-        const fetchAllUsers = async () => {
-            try {
-                const allUsers = await axios.get(USERS_LINK);
-                setUsers(allUsers.data);
-                setUsersLoaded(true);
-            } catch (error) {
-                console.log("error while loading users:", error);
-            }
-        };
         fetchAllUsers();
     }, []);
 
@@ -55,30 +55,29 @@ function App() {
 
     return (
         <AppContainer>
-            <H1>Newspaper</H1> {/* todo: link */}
-            <Navbar fluid rounded>
-                <div className="flex md:order-2">
-                    <AppButton onClick={importData} disabled={loading}>
-                        {loading ? 'Importing...' : 'Import Data'}
-                    </AppButton>
-                    <div className={"flex items-center justify-center pl-3 pr-1"}><Text>Logged in User: </Text></div>
-                    {usersLoaded ? (<UserList onChange={loginNewUser} items={users}/>) : (
-                        <Text>Loading users...</Text>)}
-                    <Navbar.Toggle/>
-                </div>
-                <Navbar.Collapse>
-                    <Navbar.Link active href="/reports">
-                        Reports
-                    </Navbar.Link>
-                    <Navbar.Link active href="/add">
-                        Add Article
-                    </Navbar.Link>
-                </Navbar.Collapse>
-            </Navbar>
-            <HomepageBar>
-
-            </HomepageBar>
             <BrowserRouter>
+                <H1><Link to={"/"} >Newspaper</Link></H1>
+                {/*<Text>{loggedInUser.username} {loggedInUser.isJournalist}</Text>*/}
+                <Navbar fluid rounded>
+                    <div className="flex md:order-2">
+                        <AppButton onClick={importData} disabled={loading}>
+                            {loading ? 'Importing...' : 'Import Data'}
+                        </AppButton>
+                        <div className={"flex items-center justify-center pl-3 pr-1"}><Text>Logged in User: </Text></div>
+                        {usersLoaded ? (<UserList onChange={loginNewUser} items={users}/>) : (
+                            <div className={"flex items-center justify-center"}><Spinner
+                                aria-label="Center-aligned spinner example"/></div>)}
+                        <Navbar.Toggle/>
+                    </div>
+                    <Navbar.Collapse>
+                        <Navbar.Link active href="/reports">
+                            Reports
+                        </Navbar.Link>
+                        <Navbar.Link active href="/add">
+                            Add Article
+                        </Navbar.Link>
+                    </Navbar.Collapse>
+                </Navbar>
                 <Routes>
                     <Route path="/" element={<Articles/>}/>
                     <Route path="/add" element={<ArticleAdd/>}/>

@@ -4,12 +4,14 @@ const loggedInUserSlice = createSlice({
     name: 'loggedInUser',
     initialState: {
         id: null,
-        username: null,
+        username: "logged in user",
+        isJournalist: false,
     },
     reducers: {
         login: (state, action) => {
             state.id = action.payload.id;
             state.username = action.payload.username;
+            state.isJournalist = action.payload.isJournalist;
         },
     }
 })

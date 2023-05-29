@@ -1,11 +1,17 @@
 import React from 'react';
-import AppLink from "../components/AppLink";
+import CommentSection from "../components/CommentSection";
+import {H2, Text} from "../components/Typography";
+import {useLocation} from "react-router-dom";
 
 const ArticleDetails = () => {
+    const location = useLocation();
+    const articleId = location.pathname.split("/")[2];
+
     return (
         <div>
-            <h1>ArticleDetails</h1>
-            <AppLink to={"/"}>Go back</AppLink>
+            <H2>ArticleDetails</H2>
+            <Text>Article content</Text>
+            <CommentSection articleId={articleId}/>
         </div>
     );
 };

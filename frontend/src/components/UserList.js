@@ -1,11 +1,13 @@
 import {Fragment, useState} from 'react'
 import {Listbox, Transition} from '@headlessui/react'
 import {CheckIcon, ChevronUpDownIcon} from '@heroicons/react/20/solid'
+import {useSelector} from "react-redux";
 
 // <1> The formatting of the Listbox is taken from: https://headlessui.com/react/listbox
 
 const UserList = ({items, onChange}) => {
-    const [selected, setSelected] = useState(items[0])
+    const loggedInUser = useSelector(state => state.loggedInUser);
+    const [selected, setSelected] = useState( {id:loggedInUser.id, username:loggedInUser.username, isJournalist:loggedInUser.isJournalist});
     onChange(selected);
 
     function onChangeDo(changeVal){
@@ -36,7 +38,7 @@ const UserList = ({items, onChange}) => {
                                     {({ selected }) => (
                                         <>
 						                <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
-                                            {item.username}
+                                            {item.isJournalist===1 ? "(J)" : ""} {item.username}
                                         </span>
                                         {selected ? (
                                             <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-600">

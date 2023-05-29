@@ -7,15 +7,16 @@ import fs from "fs";
 import {env} from "./env/envConfig.js";
 import {importData} from "./database/importData.js";
 import createDatabaseCon from "./database/databaseCon.js";
+import {QueryTypes} from "sequelize";
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-const database = createDatabaseCon();
+const database = await createDatabaseCon();
 const dbConfig = {
     host: env.MYSQL_HOST,
-    port: parseInt(env.MYSQL_PORT,10),
+    port: parseInt(env.MYSQL_PORT, 10),
     user: env.MYSQL_USERNAME,
     password: env.MYSQL_PASSWORD,
     database: env.MYSQL_DATABASE,
@@ -95,28 +96,32 @@ app.put("/articles/:articleId", (req, res) => {
     });
 });
 
-app.post("/importData", async (req, res) => {
-    try {
-        await importData();
-        res.status(200).json({ message: "Data imported successfully" });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: "Error importing data" });
-    }
+app.post("/importData", (req, res) => {
+    importData().then(
+        (value) => {
+            res.status(200).json({message: "Data imported successfully"});
+        },
+        (error) => {
+            console.log(error);
+            res.status(500).json({message: "Error importing data"});
+        }
+    );
 });
 
 app.get("/users", async (req, res) => {
     try {
-        const users  = await database.user.findAll({
-            attributes: ["user_id", "username"],
-        });
-
-        const retUsers = users.map((user) => ({
-            id: user['user_id'],
-            username: user['username'],
-        }));
-
-        return res.json(retUsers);
+        const query = `
+            SELECT
+                u.user_id,
+                u.username,
+                CASE WHEN j.user_id IS NOT NULL THEN TRUE ELSE FALSE END AS isJournalist
+            FROM
+                user u
+                    LEFT JOIN
+                journalist j ON u.user_id = j.user_id;
+        `;
+        const results = await database['sequelize'].query(query, {type: QueryTypes.SELECT});
+        return res.json(results);
     } catch (error) {
         console.error("Error retrieving users:", error);
         return res.json(error);
@@ -128,12 +133,13 @@ app.get("/", (req, res) => {
 });
 
 
-
-
 //TODO: check nginx setting
 //TODO: configure environment variables (backend port usw.) for frontend
 //TODO: ORM: Mongoose, Sequelize
 //TODO: HealthChecks for Database
 //TODO: Use Cases
 //TODO: Reports
+//TODO: Article detail
+//TODO: Journalist marker in Listbox
 //TODO: Handle Error on homepage if no articles available
+//TODO: Switch to nosql
