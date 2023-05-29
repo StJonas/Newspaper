@@ -50,6 +50,7 @@ function App() {
     }, []);
 
     function loginNewUser(user) {
+        console.log(user);
         dispatch(login(user));
     }
 
@@ -57,7 +58,7 @@ function App() {
         <AppContainer>
             <BrowserRouter>
                 <H1><Link to={"/"} >Newspaper</Link></H1>
-                {/*<Text>{loggedInUser.username} {loggedInUser.isJournalist}</Text>*/}
+                {/*<Text>{loggedInUser.username} {loggedInUser.user_id}</Text>*/}
                 <Navbar fluid rounded>
                     <div className="flex md:order-2">
                         <AppButton onClick={importData} disabled={loading}>

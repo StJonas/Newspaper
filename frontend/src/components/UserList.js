@@ -7,7 +7,7 @@ import {useSelector} from "react-redux";
 
 const UserList = ({items, onChange}) => {
     const loggedInUser = useSelector(state => state.loggedInUser);
-    const [selected, setSelected] = useState( {id:loggedInUser.id, username:loggedInUser.username, isJournalist:loggedInUser.isJournalist});
+    const [selected, setSelected] = useState( {user_id:loggedInUser.user_id, username:loggedInUser.username, isJournalist:loggedInUser.isJournalist});
     onChange(selected);
 
     function onChangeDo(changeVal){
@@ -30,7 +30,7 @@ const UserList = ({items, onChange}) => {
                     <Transition as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
                         <Listbox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                             {items.map((item, itemIdx) => (
-                                <Listbox.Option key={item.id} value={item}
+                                <Listbox.Option key={item.user_id} value={item}
                                     className={({ active }) =>
                                         `relative cursor-default select-none py-2 pl-10 pr-4 ${active ? 'bg-amber-100 text-amber-900' : 'text-gray-900'}`
                                     }

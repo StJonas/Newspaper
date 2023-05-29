@@ -99,11 +99,11 @@ app.put("/articles/:articleId", (req, res) => {
 app.post("/importData", (req, res) => {
     importData().then(
         (value) => {
-            res.status(200).json({message: "Data imported successfully"});
+            res.send("Data imported successfully");
         },
         (error) => {
-            console.log(error);
-            res.status(500).json({message: "Error importing data"});
+            console.error("Error importing data: " + error);
+            res.send(error);
         }
     );
 });
@@ -111,22 +111,72 @@ app.post("/importData", (req, res) => {
 app.get("/users", async (req, res) => {
     try {
         const query = `
-            SELECT
-                u.user_id,
-                u.username,
-                CASE WHEN j.user_id IS NOT NULL THEN TRUE ELSE FALSE END AS isJournalist
-            FROM
-                user u
-                    LEFT JOIN
-                journalist j ON u.user_id = j.user_id;
+            SELECT u.user_id, u.username, CASE WHEN j.user_id IS NOT NULL THEN TRUE ELSE FALSE END AS isJournalist
+            FROM user u LEFT JOIN journalist j ON u.user_id = j.user_id;
         `;
         const results = await database['sequelize'].query(query, {type: QueryTypes.SELECT});
         return res.json(results);
     } catch (error) {
         console.error("Error retrieving users:", error);
-        return res.json(error);
+        return res.status(500).json(error);
     }
 });
+
+app.get("/comments/:articleId", async (req, res) => {
+    const articleId = req.params.articleId;
+    try {
+        const comments = await database.comment.findAll({
+            where: {
+                article_id: articleId
+            },
+            include: [
+                {
+                    model: database.user,
+                    attributes: ['username']
+                }
+            ],
+            order: [['comment_time', 'DESC']]
+        });
+
+        const result = comments.map((comment) => ({
+            article_id: comment.article_id,
+            comment_id: comment.comment_id,
+            user_id: comment.user_id,
+            username: (comment.user ? comment.user.username : null),
+            comment_time: comment.comment_time,
+            comment_content: comment.comment_content
+        }));
+
+        return res.json(result);
+    } catch (error) {
+        return res.status(500).send('Error while getting comments!');
+    }
+});
+
+app.post("/comments", async (req, res) => {
+    const { article_id, user_id, comment_content } = req.body;
+
+    if (article_id === null || article_id === '' || user_id === null || user_id === '' || comment_content === null || comment_content === '') {
+        return res.status(500).send("Invalid input: input cannot be null or empty");
+    }
+
+    try {
+        const newComment = await database.comment.create({
+            article_id: article_id,
+            user_id: user_id,
+            comment_content: comment_content
+        });
+
+        return res.json({
+            message: 'Comment created successfully',
+            comment: newComment
+        });
+
+    } catch (error) {
+        return res.status(500).send(error);
+    }
+});
+
 
 app.get("/", (req, res) => {
     res.json("Hello, this is the backend!");
@@ -137,7 +187,6 @@ app.get("/", (req, res) => {
 //TODO: configure environment variables (backend port usw.) for frontend
 //TODO: ORM: Mongoose, Sequelize
 //TODO: HealthChecks for Database
-//TODO: Use Cases
 //TODO: Reports
 //TODO: Article detail
 //TODO: Journalist marker in Listbox

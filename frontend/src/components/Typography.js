@@ -25,10 +25,10 @@ export const H3 = ({children}) => {
     // <1> End
 };
 
-export const Text = ({children, classes}) => {
+export const Text = ({children, classes, lang}) => {
     // <2> Start
     return (
-        <p className={`text-sm text-gray-900 dark:text-white ${classes}`}>{children}</p>
+        <p className={`text-sm text-gray-900 dark:text-white ${classes}`} lang={lang}>{children}</p>
     );
     // <2> End
 };
