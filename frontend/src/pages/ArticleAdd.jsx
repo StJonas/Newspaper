@@ -6,38 +6,73 @@ import {ARTICLES_LINK} from "../assets/constants";
 import AppContainer from "../components/AppContainer";
 import AppButton from "../components/AppButton";
 import {H3} from "../components/Typography";
+import {Textarea, TextInput} from "flowbite-react";
+import CommentDialog from "../components/CommentDialog.js";
 
 const ArticleAdd = () => {
     const [article, setArticle] = useState({
         title: "",
-        desc: "",
-        price: null,
-        cover: "",
+        subtitle: "",
+        article_content: "",
     });
+    const [dialogIsOpen, setDialogIsOpen] = useState(false);
+    const [dialogMessage, setDialogMessage] = useState("Something went wrong!");
 
     const navigate = useNavigate();
 
     const handleChange = (e) => {
         setArticle((prev) => ({...prev, [e.target.name]: e.target.value}));
+      };
+
+    const createArticle = async () => {
+        await axios.post(ARTICLES_LINK, article).then(
+            (value) => {
+                setDialogMessage("Successfully created!");
+                setDialogIsOpen(true);
+            },
+            (error) => {
+                setDialogMessage(error.response.data);
+                setDialogIsOpen(true);
+            }
+        );
     };
 
-    const handleClick = async e => {
-        e.preventDefault();
-        try {
-            await axios.post(ARTICLES_LINK, article);
-            navigate("/");
-        } catch (error) {
-            console.log(error);
-        }
+    const closeDialog = ()=>{
+        setDialogIsOpen(false);
+        navigate("/");
     };
 
     return (
         <AppContainer classes={"flex flex-col gap-10"}>
             <H3>Add new article</H3>
-            <input type="text" placeholder="Title" onChange={handleChange} name="title"/>
-            <input type="text" placeholder="Subtitle" onChange={handleChange} name="subtitle"/>
-            <input type="text" placeholder="content" onChange={handleChange} name="article_content"/>
-            <div className={"lx-2"}><AppButton onClick={handleClick}>Add</AppButton></div>
+            <CommentDialog onClose={closeDialog} isOpen={dialogIsOpen} message={dialogMessage}/>
+            <TextInput
+                id="article_title"
+                type="text"
+                placeholder="Title"
+                onChange={handleChange}
+                value={article.title}
+                name="title"
+            />
+            <TextInput
+                id="article_subtitle"
+                type="text"
+                placeholder="Subtitle"
+                value={article.subtitle}
+                onChange={handleChange}
+                name="subtitle"
+            />
+            <Textarea
+                id="article_content"
+                placeholder="content"
+                required
+                rows={13}
+                value={article.article_content}
+                onChange={handleChange}
+                name="article_content"
+                type="text"
+            />
+            <div className={"lx-2"}><AppButton onClick={createArticle}>Add</AppButton></div>
         </AppContainer>
     );
 };
