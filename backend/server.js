@@ -188,7 +188,6 @@ app.get("/", (req, res) => {
 //TODO: ORM: Mongoose, Sequelize
 //TODO: HealthChecks for Database
 //TODO: Reports
-//TODO: Article detail
 //TODO: Journalist marker in Listbox
 //TODO: Handle Error on homepage if no articles available
 //TODO: Switch to nosql
