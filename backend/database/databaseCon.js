@@ -21,6 +21,20 @@ export default async function createDatabaseCon() {
     database['article'].hasOne(database['comment'], { foreignKey: 'article_id' });
     database['comment'].belongsTo(database['article'], { foreignKey: 'article_id' });
 
+    database['category'] = getCategory(database['sequelize']);
+
+    database['article_category'] = getArticleCategory(database['sequelize'], database['article'], database['category']);
+    database['article'].hasOne(database['article_category'], { foreignKey: 'article_id' });
+    database['article_category'].belongsTo(database['article'], { foreignKey: 'article_id' });
+    database['category'].hasOne(database['article_category'], { foreignKey: 'category_id' });
+    database['article_category'].belongsTo(database['category'], { foreignKey: 'category_id' });
+
+    database['user_follow'] = getUserFollow(database['sequelize'], database['user']);
+    database['user'].hasOne(database['user_follow'], { foreignKey: 'user_id' });
+    database['user_follow'].belongsTo(database['user'], { foreignKey: 'followed_user' });
+    database['user'].hasOne(database['user_follow'], { foreignKey: 'user_id' });
+    database['user_follow'].belongsTo(database['user'], { foreignKey: 'following_user' });
+
     return database;
 }
 
@@ -167,4 +181,90 @@ function getComment(sequelize, article, user) {
         freezeTableName: true,
         timestamps: false,
     });
+}
+
+function getCategory(sequelize) {
+    return sequelize.define('category', {
+        category_id: {
+            type: DataTypes.INTEGER,
+            autoIncrement: true,
+            primaryKey: true,
+        },
+        label: {
+            type: DataTypes.STRING(50),
+            allowNull: false,
+        },
+        color_code: {
+            type: DataTypes.STRING(6),
+            defaultValue: 'ffffff',
+            allowNull: false,
+        },
+    }, {
+        freezeTableName: true,
+        timestamps: false,
+    });
+}
+
+function getArticleCategory(sequelize, article, category) {
+    return sequelize.define('article_category', {
+        article_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            primaryKey: true,
+            references: {
+                model: article,
+                key: 'article_id',
+                onDelete: 'CASCADE',
+            },
+        },
+        category_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            primaryKey: true,
+            references: {
+                model: category,
+                key: 'category_id',
+                onDelete: 'CASCADE',
+            },
+        },
+    }, {
+        freezeTableName: true,
+        timestamps: false,
+    });
+}
+
+function getUserFollow(sequelize, user){
+    return sequelize.define('user_follow', {
+        following_user: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            primaryKey: true,
+            references: {
+                model: user,
+                key: 'user_id',
+                onDelete: 'CASCADE',
+            },
+        },
+        followed_user: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            primaryKey: true,
+            references: {
+                model: user,
+                key: 'user_id',
+                onDelete: 'CASCADE',
+            },
+        },
+    }, {
+        freezeTableName: true,
+        timestamps: false,
+        validate: {
+            checkNotSameUser() {
+                if (this.following_user === this.followed_user) {
+                    throw new Error('Invalid input: following_user and followed_user cannot be the same.');
+                }
+            },
+        },
+    });
+
 }

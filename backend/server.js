@@ -97,22 +97,25 @@ app.put("/articles/:articleId", (req, res) => {
 });
 
 app.post("/importData", (req, res) => {
-    importData().then(
-        (value) => {
-            res.send("Data imported successfully");
-        },
-        (error) => {
-            console.error("Error importing data: " + error);
-            res.send(error);
-        }
-    );
+    database['sequelize'].sync().then(() => {
+        importData(database).then(
+            (value) => {
+                res.send("Data imported successfully");
+            },
+            (error) => {
+                console.error("Error importing data: " + error);
+                res.send(error);
+            }
+        );
+    });
 });
 
 app.get("/users", async (req, res) => {
     try {
         const query = `
             SELECT u.user_id, u.username, CASE WHEN j.user_id IS NOT NULL THEN TRUE ELSE FALSE END AS isJournalist
-            FROM user u LEFT JOIN journalist j ON u.user_id = j.user_id;
+            FROM user u
+                     LEFT JOIN journalist j ON u.user_id = j.user_id;
         `;
         const results = await database['sequelize'].query(query, {type: QueryTypes.SELECT});
         return res.json(results);
@@ -154,7 +157,7 @@ app.get("/comments/:articleId", async (req, res) => {
 });
 
 app.post("/comments", async (req, res) => {
-    const { article_id, user_id, comment_content } = req.body;
+    const {article_id, user_id, comment_content} = req.body;
 
     if (article_id === null || article_id === '' || user_id === null || user_id === '' || comment_content === null || comment_content === '') {
         return res.status(500).send("Invalid input: input cannot be null or empty");
@@ -184,32 +187,34 @@ app.get("/", (req, res) => {
 
 app.get("/articleReport", async (req, res) => {
     try {
-      const query = `
-        SELECT j.employee_id, u.username, CONCAT(j.last_name, ' ', j.first_name) AS fullName, 
-        a.publishedArticles AS publishedArticles,
-        a.recentArticleTitle
-        FROM journalist j
-        LEFT JOIN user u ON u.user_id = j.employee_id
-        LEFT JOIN (
-          SELECT a1.journalist_id, MAX(a1.title) AS recentArticleTitle, COUNT(*) AS publishedArticles
-          FROM article a1
-          WHERE a1.publish_time >= DATE_SUB(NOW(), INTERVAL 1 YEAR)
-          GROUP BY a1.journalist_id
-        ) a ON j.employee_id = a.journalist_id
-        ORDER BY publishedArticles DESC;;
-      `;
+        const query = `
+            SELECT j.employee_id,
+                   u.username,
+                   CONCAT(j.last_name, ' ', j.first_name) AS fullName,
+                   a.publishedArticles                    AS publishedArticles,
+                   a.recentArticleTitle
+            FROM journalist j
+                     LEFT JOIN user u ON u.user_id = j.employee_id
+                     LEFT JOIN (SELECT a1.journalist_id,
+                                       MAX(a1.title) AS recentArticleTitle,
+                                       COUNT(*)      AS publishedArticles
+                                FROM article a1
+                                WHERE a1.publish_time >= DATE_SUB(NOW(), INTERVAL 1 YEAR)
+                                GROUP BY a1.journalist_id) a ON j.employee_id = a.journalist_id
+            ORDER BY publishedArticles DESC;;
+        `;
         db.query(query, (err, data) => {
             if (err)
                 return res.json(err);
             return res.json(data);
         });
-    //   const results = await database['sequelize'].query(query, { type: QueryTypes.SELECT });
-    //   return res.json(results);
+        //   const results = await database['sequelize'].query(query, { type: QueryTypes.SELECT });
+        //   return res.json(results);
     } catch (error) {
-      console.error("Error retrieving users:", error);
-      return res.status(500).json(error);
+        console.error("Error retrieving users:", error);
+        return res.status(500).json(error);
     }
-  });
+});
 
 
 //TODO: check nginx setting
@@ -217,6 +222,9 @@ app.get("/articleReport", async (req, res) => {
 //TODO: ORM: Mongoose, Sequelize
 //TODO: HealthChecks for Database
 //TODO: Reports
-//TODO: Journalist marker in Listbox
-//TODO: Handle Error on homepage if no articles available
+//TODO: Data Import
+//TODO: Login check for creating an article (only if a journalist is logged in can a new article be creted)
 //TODO: Switch to nosql
+//TODO: Reports flex-row
+//TODO: reload after importing data
+//TODO: Maybe load only the newest 100 Articles at homepage. it takes to long the get them all. 

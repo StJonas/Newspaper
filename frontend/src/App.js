@@ -14,14 +14,14 @@ import UserList from "./components/UserList";
 import {Navbar, Spinner} from "flowbite-react";
 import {useDispatch} from "react-redux";
 import {login} from './assets/loggedInUserSlice';
-import {useSelector} from "react-redux";
+// import {useSelector} from "react-redux";
 
 function App() {
     const [loading, setLoading] = useState(false);
     const [users, setUsers] = useState([]);
     const [usersLoaded, setUsersLoaded] = useState(false);
     const dispatch = useDispatch();
-    const loggedInUser = useSelector(state => state.loggedInUser);
+    // const loggedInUser = useSelector(state => state.loggedInUser);
 
     const importData = async () => {
         try {
