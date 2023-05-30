@@ -48,7 +48,7 @@ app.use((req, res, next) => {
 });
 
 app.get("/articles", (req, res) => {
-    const selectQuery = "SELECT * FROM newspaper.article LIMIT 50";
+    const selectQuery = "SELECT * FROM newspaper.article ORDER BY publish_time DESC LIMIT 50";
     db.query(selectQuery, (err, data) => {
         if (err)
             return res.json(err);
@@ -262,10 +262,5 @@ app.get("/categoryReport", async (req, res) => {
 //TODO: configure environment variables (backend port usw.) for frontend
 //TODO: ORM: Mongoose, Sequelize
 //TODO: HealthChecks for Database
-//TODO: Reports
-//TODO: Data Import
-//TODO: Login check for creating an article (only if a journalist is logged in can a new article be creted)
-//TODO: Switch to nosql
-//TODO: Reports flex-row
-//TODO: reload after importing data
-//TODO: Maybe load only the newest 100 Articles at homepage. it takes to long the get them all.
+//TODO: Login check for creating an article (only if a journalist is logged in can a new article be created)
+//TODO: migrate to nosql

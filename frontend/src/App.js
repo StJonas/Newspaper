@@ -28,7 +28,9 @@ function App() {
             setLoading(true);
             await axios.post(IMPORT_DATA_LINK);
             setLoading(false);
-            await fetchAllUsers();
+            await fetchAllUsers().then(()=>{
+                window.location.reload();
+            });
         } catch (error) {
             setLoading(false);
             console.log("error:", error);
