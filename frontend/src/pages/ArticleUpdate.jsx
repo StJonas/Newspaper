@@ -6,7 +6,8 @@ import {useEffect} from 'react';
 import {ARTICLES_LINK} from "../assets/constants";
 import UpdateButton from "../components/UpdateButton";
 import {H2} from "../components/Typography";
-import AppLink from "../components/AppLink";
+import {Textarea, TextInput} from "flowbite-react";
+import CommentDialog from "../components/CommentDialog.js";
 
 const ArticleUpdate = () => {
     const navigate = useNavigate();
@@ -14,18 +15,18 @@ const ArticleUpdate = () => {
     const articleId = location.pathname.split("/")[2];
     const [newArticle, setNewArticle] = useState({
         title: "",
-        desc: "",
-        price: null,
-        cover: "",
+        subtitle: "",
+        article_content: "",
     });
     const [article, setArticle] = useState({});
+    const [dialogIsOpen, setDialogIsOpen] = useState(false);
+    const [dialogMessage, setDialogMessage] = useState("Something went wrong!");
 
     useEffect(() => {
-
         const fetchArticle = async () => {
             try {
                 const res = await axios.get(ARTICLES_LINK + articleId);
-                await setArticle(res.data[0]);
+                setArticle(res.data[0]);
             } catch (error) {
                 console.log(error);
             }
@@ -37,24 +38,81 @@ const ArticleUpdate = () => {
         setNewArticle((prev) => ({...prev, [e.target.name]: e.target.value}));
     };
 
-    const handleClick = async (e) => {
-        e.preventDefault();
-        try {
-            await axios.put(ARTICLES_LINK + articleId, newArticle);
-            navigate("/");
-        } catch (err) {
-            console.log(err);
+    const handleClick = async () => {
+        const updatedArticle = {};
+        let changesDetected = false;
+        
+        if (newArticle.title && newArticle.title !== article.title) {
+            updatedArticle.title = newArticle.title;
+            changesDetected = true;
+        } else {
+            updatedArticle.title = article.title;
         }
+        if (newArticle.subtitle && newArticle.subtitle !== article.subtitle) {
+            updatedArticle.subtitle = newArticle.subtitle;
+            changesDetected = true;
+        } else {
+            updatedArticle.subtitle = article.subtitle;
+        }
+        if (newArticle.article_content && newArticle.article_content !== article.article_content) {
+            updatedArticle.article_content = newArticle.article_content;
+            changesDetected = true;
+        } else {
+            updatedArticle.article_content = article.article_content;
+        }
+        
+        if (!changesDetected) {
+            setDialogMessage("No changes were made.");
+            setDialogIsOpen(true);
+            return;
+        }
+        
+        try {
+            await axios.put(ARTICLES_LINK + articleId, updatedArticle);
+            setDialogMessage("Successfully updated!");
+            setDialogIsOpen(true);
+        } catch (error) {
+            setDialogMessage(error.response.data);
+            setDialogIsOpen(true);
+        }
+    };
+      
+    const closeDialog = ()=>{
+        setDialogIsOpen(false);
+        navigate("/");
     };
 
     return (
         <div className={"flex flex-col gap-3 pt-5"}>
             <H2>Update article</H2>
-            <input type="text" placeholder={article['title']} onChange={handleChange} name="title"/>
-            <input type="text" placeholder={article['subtitle']} onChange={handleChange} name="subtitle"/>
-            <input type="text" placeholder={article['article_content']} onChange={handleChange} name="article_content"/>
+            <CommentDialog onClose={closeDialog} isOpen={dialogIsOpen} message={dialogMessage}/>
+            <TextInput
+                id="article_title"
+                type="text"
+                placeholder={article.title}
+                onChange={handleChange}
+                value={newArticle.title}
+                name="title"
+            />
+            <TextInput
+                id="article_subtitle"
+                type="text"
+                placeholder={article.subtitle}
+                value={newArticle.subtitle}
+                onChange={handleChange}
+                name="subtitle"
+            />
+            <Textarea
+                id="article_content"
+                placeholder={article.article_content}
+                required
+                rows={13}
+                value={newArticle.article_content}
+                onChange={handleChange}
+                name="article_content"
+                type="text"
+            />
             <div><UpdateButton onClick={handleClick}>Update</UpdateButton></div>
-            <AppLink to="/">Go back</AppLink>
         </div>
     );
 
