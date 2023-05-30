@@ -182,6 +182,35 @@ app.get("/", (req, res) => {
     res.json("Hello, this is the backend!");
 });
 
+app.get("/articleReport", async (req, res) => {
+    try {
+      const query = `
+        SELECT j.employee_id, u.username, CONCAT(j.last_name, ' ', j.first_name) AS fullName, 
+        a.publishedArticles AS publishedArticles,
+        a.recentArticleTitle
+        FROM journalist j
+        LEFT JOIN user u ON u.user_id = j.employee_id
+        LEFT JOIN (
+          SELECT a1.journalist_id, MAX(a1.title) AS recentArticleTitle, COUNT(*) AS publishedArticles
+          FROM article a1
+          WHERE a1.publish_time >= DATE_SUB(NOW(), INTERVAL 1 YEAR)
+          GROUP BY a1.journalist_id
+        ) a ON j.employee_id = a.journalist_id
+        ORDER BY publishedArticles DESC;;
+      `;
+        db.query(query, (err, data) => {
+            if (err)
+                return res.json(err);
+            return res.json(data);
+        });
+    //   const results = await database['sequelize'].query(query, { type: QueryTypes.SELECT });
+    //   return res.json(results);
+    } catch (error) {
+      console.error("Error retrieving users:", error);
+      return res.status(500).json(error);
+    }
+  });
+
 
 //TODO: check nginx setting
 //TODO: configure environment variables (backend port usw.) for frontend

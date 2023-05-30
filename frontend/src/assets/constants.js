@@ -7,3 +7,5 @@ export const IMPORT_DATA_LINK = BASE_LINK + "importData/";
 export const USERS_LINK = BASE_LINK + "users/";
 
 export const COMMENTS_LINK = BASE_LINK + "comments/";
+
+export const ARTICLES_REPORT_LINK = BASE_LINK + "articleReport/";
