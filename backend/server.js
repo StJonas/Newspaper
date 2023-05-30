@@ -48,7 +48,7 @@ app.use((req, res, next) => {
 });
 
 app.get("/articles", (req, res) => {
-    const selectQuery = "SELECT * FROM newspaper.article";
+    const selectQuery = "SELECT * FROM newspaper.article LIMIT 50";
     db.query(selectQuery, (err, data) => {
         if (err)
             return res.json(err);
@@ -216,6 +216,47 @@ app.get("/articleReport", async (req, res) => {
     }
 });
 
+app.get("/categoryReport", async (req, res) => {
+    try {
+        const result = await database.category.findAll({
+            attributes: [
+                'label',
+                [
+                    database.sequelize.literal('COUNT(*) / COUNT(DISTINCT article_category.article_id)'),
+                    'AverageNumberofComments',
+                ],
+            ],
+            include: [
+                {
+                    model: database['article_category'],
+                    as: 'article_category',
+                    attributes: [],
+                    include: [
+                        {
+                            model: database['comment'],
+                            as: 'comments',
+                            attributes: [],
+                        },
+                    ],
+                },
+            ],
+            group: ['category.category_id'],
+            order: [[database.sequelize.literal('AverageNumberofComments'), 'DESC']],
+            // limit: 10,
+        });
+
+        const categoryReport = result.map(item => ({
+            label: item.label,
+            avgNumOfCmt: item.get('AverageNumberofComments'),
+        }));
+
+        res.json(categoryReport);
+    } catch (error) {
+        console.error('Error retrieving average number of comments per article:', error);
+        res.status(500).json(error);
+    }
+});
+
 
 //TODO: check nginx setting
 //TODO: configure environment variables (backend port usw.) for frontend
@@ -227,4 +268,4 @@ app.get("/articleReport", async (req, res) => {
 //TODO: Switch to nosql
 //TODO: Reports flex-row
 //TODO: reload after importing data
-//TODO: Maybe load only the newest 100 Articles at homepage. it takes to long the get them all. 
+//TODO: Maybe load only the newest 100 Articles at homepage. it takes to long the get them all.

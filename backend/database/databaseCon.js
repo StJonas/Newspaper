@@ -28,6 +28,9 @@ export default async function createDatabaseCon() {
     database['article_category'].belongsTo(database['article'], { foreignKey: 'article_id' });
     database['category'].hasOne(database['article_category'], { foreignKey: 'category_id' });
     database['article_category'].belongsTo(database['category'], { foreignKey: 'category_id' });
+    database['comment'].belongsTo(database['article_category'], { foreignKey: 'article_id' });
+    database['article_category'].hasMany(database['comment'], { foreignKey: 'article_id' });
+
 
     database['user_follow'] = getUserFollow(database['sequelize'], database['user']);
     database['user'].hasOne(database['user_follow'], { foreignKey: 'user_id' });
