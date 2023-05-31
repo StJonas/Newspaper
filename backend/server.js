@@ -47,42 +47,65 @@ app.use((req, res, next) => {
     next();
 });
 
-app.get("/articles", (req, res) => {
+app.get("/articles", async (req, res) => {
     const selectQuery = "SELECT * FROM newspaper.article ORDER BY publish_time DESC LIMIT 50";
-    db.query(selectQuery, (err, data) => {
-        if (err)
-            return res.json(err);
-        return res.json(data);
-    });
+    const results = await database['sequelize'].query(selectQuery, {type: QueryTypes.SELECT});
+    return res.json(results);
 });
 
-app.get("/articles/:articleId", (req, res) => {
+app.get("/articles/:articleId", async (req, res) => {
     const articleId = req.params['articleId'];
-    const selectQuery = "SELECT * FROM newspaper.article WHERE article_id = ?";
-    db.query(selectQuery, [articleId], (err, data) => {
-        if (err)
-            return res.send(err);
-        return res.json(data);
-    });
+
+    try {
+        const result = await database.article.findOne({
+            where: {
+                article_id: articleId,
+            },
+        });
+
+        return res.json(result);
+    } catch (error) {
+        console.error('Error retrieving article:', error);
+        return res.status(500).json({ error: 'Failed to retrieve article' });
+    }
 });
 
-app.delete("/articles/:articleId", (req, res) => {
+app.delete("/articles/:articleId", async (req, res) => {
     const articleId = req.params['articleId'];
-    const deleteQuery = "DELETE FROM newspaper.article WHERE article_id = ?";
-    db.query(deleteQuery, [articleId], (err, data) => {
-        if (err) return res.send(err);
-        return res.json(data);
-    });
+
+    try {
+        const result = await database.article.destroy({
+            where: {
+                article_id: articleId,
+            },
+        });
+
+        return res.json(result);
+    } catch (error) {
+        console.error('Error retrieving article:', error);
+        return res.status(500).json({ error: 'Failed to retrieve article' });
+    }
 });
 
-app.post("/articles", (req, res) => {
-    const insertQuery = "INSERT INTO newspaper.article (`title`,`subtitle`,`article_content`) VALUES (?)";
-    const values = [req.body['title'], req.body['subtitle'], req.body['article_content']];
-    db.query(insertQuery, [values], (err, data) => {
-        if (err)
-            return res.json(err);
-        return res.json(data);
-    });
+app.post("/articles", async (req, res) => {
+    try {
+        const { title, subtitle, article_content } = req.body;
+
+        const newArticle = await database.article.create({
+            title: title,
+            subtitle: subtitle,
+            article_content: article_content
+            //journalist_id
+        });
+
+        return res.json({
+            message: 'Artilce created successfully',
+            article: newArticle
+        });
+
+    } catch (error) {
+        return res.status(500).send(error);
+    }
 });
 
 app.put("/articles/:articleId", (req, res) => {
