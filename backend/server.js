@@ -201,7 +201,8 @@ app.get("/articleReport", async (req, res) => {
                                 FROM article a1
                                 WHERE a1.publish_time >= DATE_SUB(NOW(), INTERVAL 1 YEAR)
                                 GROUP BY a1.journalist_id) a ON j.employee_id = a.journalist_id
-            ORDER BY publishedArticles DESC;;
+            ORDER BY publishedArticles DESC
+            LIMIT 10;
         `;
         db.query(query, (err, data) => {
             if (err)

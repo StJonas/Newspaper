@@ -1,4 +1,5 @@
 import { H2, Text } from "./Typography";
+import { Table } from "flowbite-react";
 import { ARTICLES_REPORT_LINK } from "../assets/constants";
 import { useEffect } from "react";
 import { useState } from "react";
@@ -22,26 +23,36 @@ const ReportJournalist = ({ classes }) => {
 
   return (
     <div className={`${classes}`}>
-      <br />
-      <H2>Report Journalist</H2>
-      <table>
-        <thead>
-          <tr>
-            <th>Full Name</th>
-            <th>Published Articles</th>
-            <th>Recent Article Title</th>
-          </tr>
-        </thead>
-        <tbody>
-          {values.map((journalist) => (
-            <tr key={journalist.employee_id}>
-              <td>{journalist.fullName}</td>
-              <td>{journalist.publishedArticles}</td>
-              <td>{journalist.recentArticleTitle}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+        <br/>
+        <H2>Report Category</H2>
+        <Table className={"mt-6 w-3/4"}>
+            <Table.Head>
+                <Table.HeadCell>
+                    Full Name
+                </Table.HeadCell>
+                <Table.HeadCell>
+                    Published Articles
+                </Table.HeadCell>
+                <Table.HeadCell>
+                    Recent Article Title
+                </Table.HeadCell>
+            </Table.Head>
+            <Table.Body className="divide-y">
+                {values.map((journalist) => (
+                    <Table.Row key={journalist.employee_id} className="bg-white dark:border-gray-700 dark:bg-gray-800">
+                        <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                            {journalist.fullName}
+                        </Table.Cell>
+                        <Table.Cell>
+                            {journalist.publishedArticles}
+                        </Table.Cell>
+                        <Table.Cell>
+                            {journalist.recentArticleTitle}
+                        </Table.Cell>
+                    </Table.Row>
+                ))}
+            </Table.Body>
+        </Table>
     </div>
   );
 };

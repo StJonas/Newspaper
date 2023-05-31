@@ -21,12 +21,18 @@ const ArticleUpdate = () => {
     const [article, setArticle] = useState({});
     const [dialogIsOpen, setDialogIsOpen] = useState(false);
     const [dialogMessage, setDialogMessage] = useState("Something went wrong!");
+    const [oldTitle, setOldTitle] = useState("");
+    const [oldSubtitle, setOldSubtitle] = useState("");
+    const [oldContent, setOldContent] = useState("");
 
     useEffect(() => {
         const fetchArticle = async () => {
             try {
                 const res = await axios.get(ARTICLES_LINK + articleId);
                 setArticle(res.data[0]);
+                setOldTitle(res.data[0].title);
+                setOldSubtitle(res.data[0].subtitle);
+                setOldContent(res.data[0].article_content);
             } catch (error) {
                 console.log(error);
             }
@@ -91,23 +97,23 @@ const ArticleUpdate = () => {
                 type="text"
                 placeholder={article.title}
                 onChange={handleChange}
-                value={newArticle.title}
+                value={newArticle.title || article.title}
                 name="title"
             />
             <TextInput
                 id="article_subtitle"
                 type="text"
-                placeholder={article.subtitle}
-                value={newArticle.subtitle}
+                placeholder={oldSubtitle}
+                value={newArticle.subtitle || article.subtitle}
                 onChange={handleChange}
                 name="subtitle"
             />
             <Textarea
                 id="article_content"
-                placeholder={article.article_content}
+                placeholder={oldContent}
                 required
                 rows={13}
-                value={newArticle.article_content}
+                value={article.article_content}
                 onChange={handleChange}
                 name="article_content"
                 type="text"
@@ -115,7 +121,6 @@ const ArticleUpdate = () => {
             <div><UpdateButton onClick={handleClick}>Update</UpdateButton></div>
         </div>
     );
-
 };
 
 export default ArticleUpdate;
