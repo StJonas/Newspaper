@@ -1,4 +1,4 @@
-import { H2, Text } from "./Typography";
+import { H2 } from "./Typography";
 import { Table } from "flowbite-react";
 import { ARTICLES_REPORT_LINK } from "../assets/constants";
 import { useEffect } from "react";
@@ -12,10 +12,9 @@ const ReportJournalist = ({ classes }) => {
     const fetchReport = async () => {
       try {
         const res = await axios.get(ARTICLES_REPORT_LINK);
-        console.log("Data: ", res.data);
         setValues(res.data);
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     };
     fetchReport();

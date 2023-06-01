@@ -1,5 +1,4 @@
 import express from "express";
-import mysql from "mysql2";
 import cors from "cors";
 import https from "https";
 import http from "http";
@@ -7,21 +6,13 @@ import fs from "fs";
 import {env} from "./env/envConfig.js";
 import {importData} from "./database/importData.js";
 import createDatabaseCon from "./database/databaseCon.js";
-import {QueryTypes} from "sequelize";
+import {QueryTypes, Sequelize} from "sequelize";
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
 const database = await createDatabaseCon();
-const dbConfig = {
-    host: env.MYSQL_HOST,
-    port: parseInt(env.MYSQL_PORT, 10),
-    user: env.MYSQL_USERNAME,
-    password: env.MYSQL_PASSWORD,
-    database: env.MYSQL_DATABASE,
-};
-const db = mysql.createPool(dbConfig);
 
 const backendHttpPort = env.HTTP_PORT;
 const backendHttpsPort = env.HTTPS_PORT;
@@ -66,7 +57,7 @@ app.get("/articles/:articleId", async (req, res) => {
         return res.json(result);
     } catch (error) {
         console.error('Error retrieving article:', error);
-        return res.status(500).json({ error: 'Failed to retrieve article' });
+        return res.status(500).json({error: 'Failed to retrieve article'});
     }
 });
 
@@ -83,13 +74,13 @@ app.delete("/articles/:articleId", async (req, res) => {
         return res.json(result);
     } catch (error) {
         console.error('Error retrieving article:', error);
-        return res.status(500).json({ error: 'Failed to retrieve article' });
+        return res.status(500).json({error: 'Failed to retrieve article'});
     }
 });
 
 app.post("/articles", async (req, res) => {
     try {
-        const { title, subtitle, article_content } = req.body;
+        const {title, subtitle, article_content} = req.body;
 
         const newArticle = await database.article.create({
             title: title,
@@ -108,59 +99,32 @@ app.post("/articles", async (req, res) => {
     }
 });
 
+
 app.put("/articles/:articleId", async (req, res) => {
     const articleId = req.params['articleId'];
-    const updateData = {};
-    var article;
+    const { title, subtitle, article_content } = req.body;
 
     try {
-        // article = await database.article.findByPk(articleId);
-        // console.log("Article: ", article);
-        article = await database.article.findOne({
-            article_id: articleId
-        });
-        console.log("Article: ", article);
-    } catch (error) {
-        console.error('Error finding article:');
-    }
+        const updatedArticle = await database.article.update(
+            {
+                title: title,
+                subtitle: subtitle,
+                article_content: article_content
+            },
+            {
+                where: {
+                    article_id: articleId
+                }
+            }
+        );
 
-    try {
-        if (!article) {
-            return res.status(404).json({ error: 'Article not found' });
-        }
-        // updateData.title = req.body.title || article.title;
-        // updateData.subtitle = req.body.subtitle || article.subtitle;
-        // updateData.article_content = req.body.article_content || article.article_content;
-        // console.log("updateData: ",updateData);
-        // console.log("articleId: ",articleId);
-        // const updatedArticle = await database.article.update(
-        //     updateData,
-        //     { where: { article_id: articleId } }
-        // );
-
-        article.title = req.body.title || article.title;
-        article.subtitle = req.body.subtitle || article.subtitle;
-        article.article_content = req.body.article_content || article.article_content;
-        await article.save();
-
-        return res.json(article);
+        return res.json(updatedArticle);
     } catch (error) {
         console.error('Error updating article:', error);
         return res.status(500).json({ error: 'Failed to update article' });
     }
 });
 
-// app.put("/articles/:articleId", (req, res) => {
-//     console.log("test");
-//     const articleId = req.params['articleId'];
-//     const updateQuery = "UPDATE newspaper.article SET `title` = ?, `subtitle` = ?, `article_content` = ? WHERE article_id = ?";
-//     const values = [req.body['title'], req.body['subtitle'], req.body['article_content'], articleId];
-//     db.query(updateQuery, values, (err, data) => {
-//         if (err)
-//             return res.send(err);
-//         return res.json(data);
-//     });
-// });
 
 app.post("/importData", (req, res) => {
     database['sequelize'].sync().then(() => {
@@ -178,18 +142,31 @@ app.post("/importData", (req, res) => {
 
 app.get("/users", async (req, res) => {
     try {
-        const query = `
-            SELECT u.user_id, u.username, CASE WHEN j.user_id IS NOT NULL THEN TRUE ELSE FALSE END AS isJournalist
-            FROM user u
-                     LEFT JOIN journalist j ON u.user_id = j.user_id;
-        `;
-        const results = await database['sequelize'].query(query, {type: QueryTypes.SELECT});
+        const results = await database.user.findAll({
+            attributes: [
+                'user_id',
+                'username',
+                [
+                    Sequelize.literal('CASE WHEN journalist.user_id IS NOT NULL THEN TRUE ELSE FALSE END'),
+                    'isJournalist'
+                ]
+            ],
+            include: [
+                {
+                    model: database.journalist,
+                    as: 'journalist',
+                    attributes: []
+                }
+            ]
+        });
+
         return res.json(results);
     } catch (error) {
         console.error("Error retrieving users:", error);
         return res.status(500).json(error);
     }
 });
+
 
 app.get("/comments/:articleId", async (req, res) => {
     const articleId = req.params.articleId;
@@ -253,35 +230,41 @@ app.get("/", (req, res) => {
 
 app.get("/articleReport", async (req, res) => {
     try {
-        const query = `
-            SELECT j.employee_id,
-                   u.username,
-                   CONCAT(j.last_name, ' ', j.first_name) AS fullName,
-                   a.publishedArticles                    AS publishedArticles,
-                   a.recentArticleTitle
-            FROM journalist j
-                     LEFT JOIN user u ON u.user_id = j.employee_id
-                     LEFT JOIN (SELECT a1.journalist_id,
-                                       MAX(a1.title) AS recentArticleTitle,
-                                       COUNT(*)      AS publishedArticles
-                                FROM article a1
-                                WHERE a1.publish_time >= DATE_SUB(NOW(), INTERVAL 1 YEAR)
-                                GROUP BY a1.journalist_id) a ON j.employee_id = a.journalist_id
-            ORDER BY publishedArticles DESC
-            LIMIT 10;
-        `;
-        // db.query(query, (err, data) => {
-        //     if (err)
-        //         return res.json(err);
-        //     return res.json(data);
-        // });
-          const results = await database['sequelize'].query(query, { type: QueryTypes.SELECT });
-          return res.json(results);
+        const results = await database.journalist.findAll({
+            attributes: [
+                'employee_id',
+                [Sequelize.literal('CONCAT(last_name, " ", first_name)'), 'fullName'],
+                [
+                    Sequelize.literal(`
+                        (SELECT COUNT(*) FROM article a1 WHERE a1.journalist_id = journalist.employee_id 
+                        AND a1.publish_time >= DATE_SUB(NOW(), INTERVAL 1 YEAR))`),
+                    'publishedArticles'
+                ],
+                [
+                    Sequelize.literal(`
+                        (SELECT MAX(title) FROM article a1 WHERE a1.journalist_id = journalist.employee_id 
+                        AND a1.publish_time >= DATE_SUB(NOW(), INTERVAL 1 YEAR))`),
+                    'recentArticleTitle'
+                ]
+            ],
+            include: [
+                {
+                    model: database.user,
+                    as: 'user',
+                    attributes: ['username']
+                }
+            ],
+            order: [[Sequelize.literal('publishedArticles'), 'DESC']],
+            limit: 10,
+        });
+
+        return res.json(results);
     } catch (error) {
-        console.error("Error retrieving users:", error);
+        console.error("Error retrieving article report:", error);
         return res.status(500).json(error);
     }
 });
+
 
 app.get("/categoryReport", async (req, res) => {
     try {
@@ -290,7 +273,7 @@ app.get("/categoryReport", async (req, res) => {
                 'label',
                 [
                     database.sequelize.literal('COUNT(*) / COUNT(DISTINCT article_category.article_id)'),
-                    'AverageNumberofComments',
+                    'avgNumOfCmt',
                 ],
             ],
             include: [
@@ -308,16 +291,11 @@ app.get("/categoryReport", async (req, res) => {
                 },
             ],
             group: ['category.category_id'],
-            order: [[database.sequelize.literal('AverageNumberofComments'), 'DESC']],
+            order: [[database.sequelize.literal('avgNumOfCmt'), 'DESC']],
             // limit: 10,
         });
 
-        const categoryReport = result.map(item => ({
-            label: item.label,
-            avgNumOfCmt: item.get('AverageNumberofComments'),
-        }));
-
-        res.json(categoryReport);
+        res.json(result);
     } catch (error) {
         console.error('Error retrieving average number of comments per article:', error);
         res.status(500).json(error);
@@ -327,7 +305,9 @@ app.get("/categoryReport", async (req, res) => {
 
 //TODO: check nginx setting
 //TODO: configure environment variables (backend port usw.) for frontend
-//TODO: ORM: Mongoose, Sequelize
+//TODO: ORM: Mongoose
+//TODO: Login ListBox is under Report table. it should be above it
+//TODO: Check what is wrong with update fields
 //TODO: HealthChecks for Database
 //TODO: Login check for creating an article (only if a journalist is logged in can a new article be created)
 //TODO: migrate to nosql

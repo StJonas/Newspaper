@@ -13,7 +13,7 @@ export default async function createDatabaseCon() {
 
     database['article'] = getArticle(database['sequelize'], database['journalist']);
     database['journalist'].hasOne(database['article'], { foreignKey: 'journalist_id' });
-    database['article'].belongsTo(database['journalist'], { foreignKey: 'employee_id' });
+    // database['article'].belongsTo(database['journalist'], { foreignKey: 'employee_id' });
 
     database['comment'] = getComment(database['sequelize'], database['article'], database['user']);
     database['user'].hasOne(database['comment'], { foreignKey: 'user_id' });
@@ -118,6 +118,7 @@ function getArticle(sequelize, journalist) {
         },
         journalist_id: {
             type: DataTypes.INTEGER,
+            allowNull: true,
             references: {
                 model: journalist,
                 key: 'employee_id',
@@ -146,6 +147,7 @@ function getArticle(sequelize, journalist) {
         timestamps: false,
     });
 }
+
 
 function getComment(sequelize, article, user) {
     return sequelize.define('comment', {

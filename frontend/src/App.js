@@ -52,7 +52,6 @@ function App() {
     }, []);
 
     function loginNewUser(user) {
-        console.log(user);
         dispatch(login(user));
     }
 

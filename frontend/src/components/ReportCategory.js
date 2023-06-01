@@ -11,10 +11,9 @@ const ReportCategory = ({classes}) => {
         (async () => {
             try {
                 const res = await axios.get(CATEGORY_REPORT_LINK);
-                console.log("Data: ", res.data);
                 setValues(res.data);
             } catch (error) {
-                console.log(error);
+                console.error(error);
             }
         })();
     }, []);
