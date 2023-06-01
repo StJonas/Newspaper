@@ -108,16 +108,59 @@ app.post("/articles", async (req, res) => {
     }
 });
 
-app.put("/articles/:articleId", (req, res) => {
+app.put("/articles/:articleId", async (req, res) => {
     const articleId = req.params['articleId'];
-    const updateQuery = "UPDATE newspaper.article SET `title` = ?, `subtitle` = ?, `article_content` = ? WHERE article_id = ?";
-    const values = [req.body['title'], req.body['subtitle'], req.body['article_content'], articleId];
-    db.query(updateQuery, values, (err, data) => {
-        if (err)
-            return res.send(err);
-        return res.json(data);
-    });
+    const updateData = {};
+    var article;
+
+    try {
+        // article = await database.article.findByPk(articleId);
+        // console.log("Article: ", article);
+        article = await database.article.findOne({
+            article_id: articleId
+        });
+        console.log("Article: ", article);
+    } catch (error) {
+        console.error('Error finding article:');
+    }
+
+    try {
+        if (!article) {
+            return res.status(404).json({ error: 'Article not found' });
+        }
+        // updateData.title = req.body.title || article.title;
+        // updateData.subtitle = req.body.subtitle || article.subtitle;
+        // updateData.article_content = req.body.article_content || article.article_content;
+        // console.log("updateData: ",updateData);
+        // console.log("articleId: ",articleId);
+        // const updatedArticle = await database.article.update(
+        //     updateData,
+        //     { where: { article_id: articleId } }
+        // );
+
+        article.title = req.body.title || article.title;
+        article.subtitle = req.body.subtitle || article.subtitle;
+        article.article_content = req.body.article_content || article.article_content;
+        await article.save();
+
+        return res.json(article);
+    } catch (error) {
+        console.error('Error updating article:', error);
+        return res.status(500).json({ error: 'Failed to update article' });
+    }
 });
+
+// app.put("/articles/:articleId", (req, res) => {
+//     console.log("test");
+//     const articleId = req.params['articleId'];
+//     const updateQuery = "UPDATE newspaper.article SET `title` = ?, `subtitle` = ?, `article_content` = ? WHERE article_id = ?";
+//     const values = [req.body['title'], req.body['subtitle'], req.body['article_content'], articleId];
+//     db.query(updateQuery, values, (err, data) => {
+//         if (err)
+//             return res.send(err);
+//         return res.json(data);
+//     });
+// });
 
 app.post("/importData", (req, res) => {
     database['sequelize'].sync().then(() => {
@@ -227,13 +270,13 @@ app.get("/articleReport", async (req, res) => {
             ORDER BY publishedArticles DESC
             LIMIT 10;
         `;
-        db.query(query, (err, data) => {
-            if (err)
-                return res.json(err);
-            return res.json(data);
-        });
-        //   const results = await database['sequelize'].query(query, { type: QueryTypes.SELECT });
-        //   return res.json(results);
+        // db.query(query, (err, data) => {
+        //     if (err)
+        //         return res.json(err);
+        //     return res.json(data);
+        // });
+          const results = await database['sequelize'].query(query, { type: QueryTypes.SELECT });
+          return res.json(results);
     } catch (error) {
         console.error("Error retrieving users:", error);
         return res.status(500).json(error);
