@@ -31,13 +31,12 @@ const ArticleAdd = () => {
         if (loggedInUser) {
           setJournalist(loggedInUser.user_id);
         } 
-        console.log("Article add id: ", loggedInUser.user_id);
     }, [loggedInUser]);
 
     const createArticle = async () => {
         const articleData = {
             ...article,
-            journalist: journalistId
+            journalist_id: journalistId
         };
 
         await axios.post(ARTICLES_LINK, articleData).then(
@@ -60,7 +59,6 @@ const ArticleAdd = () => {
     return (
         <AppContainer classes={"flex flex-col gap-10"}>
             <H3>Add new article</H3>
-            <Text>{loggedInUser.username} {loggedInUser.user_id} {loggedInUser.isJournalist ? "J" : null}</Text>
             <CommentDialog onClose={closeDialog} isOpen={dialogIsOpen} message={dialogMessage}/>
             <TextInput
                 id="article_title"

@@ -80,15 +80,19 @@ app.delete("/articles/:articleId", async (req, res) => {
 
 app.post("/articles", async (req, res) => {
     try {
-        const {title, subtitle, article_content, journalist} = req.body;
+        const {title, subtitle, article_content, journalist_id} = req.body;
 
-        console.log(journalist);
+        const journalist = await database.journalist.findOne({
+            where: {
+                user_id: journalist_id,
+            },
+        });
 
         const newArticle = await database.article.create({
             title: title,
             subtitle: subtitle,
-            article_content: article_content
-            //journalist_id
+            article_content: article_content,
+            journalist_id: journalist.employee_id
         });
 
         return res.json({
