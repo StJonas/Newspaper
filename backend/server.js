@@ -315,5 +315,5 @@ app.get("/categoryReport", async (req, res) => {
 //TODO: Login ListBox is under Report table. it should be above it
 //TODO: Check what is wrong with update fields
 //TODO: HealthChecks for Database
-//TODO: Login check for creating an article (only if a journalist is logged in can a new article be created)
 //TODO: migrate to nosql
+//TODO: user drop down takes ages to load
