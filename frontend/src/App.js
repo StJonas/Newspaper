@@ -14,14 +14,15 @@ import UserList from "./components/UserList";
 import {Navbar, Spinner} from "flowbite-react";
 import {useDispatch} from "react-redux";
 import {login} from './assets/loggedInUserSlice';
-// import {useSelector} from "react-redux";
+import {useSelector} from "react-redux";
 
 function App() {
     const [loading, setLoading] = useState(false);
     const [users, setUsers] = useState([]);
     const [usersLoaded, setUsersLoaded] = useState(false);
+    const [isJournalist, setJournalist] = useState(false);
     const dispatch = useDispatch();
-    // const loggedInUser = useSelector(state => state.loggedInUser);
+    const loggedInUser = useSelector(state => state.loggedInUser);
 
     const importData = async () => {
         try {
@@ -55,6 +56,14 @@ function App() {
         dispatch(login(user));
     }
 
+    useEffect(() => {
+        if (loggedInUser && loggedInUser.isJournalist) {
+          setJournalist(true);
+        } else {
+          setJournalist(false);
+        }
+      }, [loggedInUser]);
+
     return (
         <AppContainer>
             <BrowserRouter>
@@ -75,9 +84,11 @@ function App() {
                         <Navbar.Link active href="/reports">
                             Reports
                         </Navbar.Link>
+                        {isJournalist && (
                         <Navbar.Link active href="/add">
                             Add Article
                         </Navbar.Link>
+                        )}
                     </Navbar.Collapse>
                 </Navbar>
                 <Routes>

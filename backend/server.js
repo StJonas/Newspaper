@@ -80,7 +80,7 @@ app.delete("/articles/:articleId", async (req, res) => {
 
 app.post("/articles", async (req, res) => {
     try {
-        const {title, subtitle, article_content} = req.body;
+        const {title, subtitle, article_content, journalist} = req.body;
 
         const newArticle = await database.article.create({
             title: title,

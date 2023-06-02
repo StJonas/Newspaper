@@ -1,6 +1,7 @@
 import axios from 'axios';
 import React from 'react';
-import {useState} from 'react';
+import {useEffect, useState} from "react";
+import {useSelector} from "react-redux";
 import {useNavigate} from 'react-router-dom';
 import {ARTICLES_LINK} from "../assets/constants";
 import AppContainer from "../components/AppContainer";
@@ -10,11 +11,13 @@ import {Textarea, TextInput} from "flowbite-react";
 import CommentDialog from "../components/CommentDialog.js";
 
 const ArticleAdd = () => {
+    const loggedInUser = useSelector(state => state.loggedInUser);
     const [article, setArticle] = useState({
         title: "",
         subtitle: "",
         article_content: "",
     });
+    const [journalistId, setJournalist] = useState(null);
     const [dialogIsOpen, setDialogIsOpen] = useState(false);
     const [dialogMessage, setDialogMessage] = useState("Something went wrong!");
 
@@ -22,10 +25,22 @@ const ArticleAdd = () => {
 
     const handleChange = (e) => {
         setArticle((prev) => ({...prev, [e.target.name]: e.target.value}));
-      };
+    };
+
+    useEffect(() => {
+        if (loggedInUser) {
+          setJournalist(loggedInUser.user_id);
+        } 
+        console.log("Article add id: ", loggedInUser.user_id);
+    }, [loggedInUser]);
 
     const createArticle = async () => {
-        await axios.post(ARTICLES_LINK, article).then(
+        const articleData = {
+            ...article,
+            journalist: journalistId
+        };
+
+        await axios.post(ARTICLES_LINK, articleData).then(
             (value) => {
                 setDialogMessage("Successfully created!");
                 setDialogIsOpen(true);
