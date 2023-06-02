@@ -82,6 +82,8 @@ app.post("/articles", async (req, res) => {
     try {
         const {title, subtitle, article_content, journalist} = req.body;
 
+        console.log(journalist);
+
         const newArticle = await database.article.create({
             title: title,
             subtitle: subtitle,

@@ -6,7 +6,7 @@ import {useNavigate} from 'react-router-dom';
 import {ARTICLES_LINK} from "../assets/constants";
 import AppContainer from "../components/AppContainer";
 import AppButton from "../components/AppButton";
-import {H3} from "../components/Typography";
+import {H3, Text} from "../components/Typography";
 import {Textarea, TextInput} from "flowbite-react";
 import CommentDialog from "../components/CommentDialog.js";
 
@@ -60,6 +60,7 @@ const ArticleAdd = () => {
     return (
         <AppContainer classes={"flex flex-col gap-10"}>
             <H3>Add new article</H3>
+            <Text>{loggedInUser.username} {loggedInUser.user_id} {loggedInUser.isJournalist ? "J" : null}</Text>
             <CommentDialog onClose={closeDialog} isOpen={dialogIsOpen} message={dialogMessage}/>
             <TextInput
                 id="article_title"
@@ -68,6 +69,7 @@ const ArticleAdd = () => {
                 onChange={handleChange}
                 value={article.title}
                 name="title"
+                disabled={!loggedInUser.isJournalist}
             />
             <TextInput
                 id="article_subtitle"
@@ -76,6 +78,7 @@ const ArticleAdd = () => {
                 value={article.subtitle}
                 onChange={handleChange}
                 name="subtitle"
+                disabled={!loggedInUser.isJournalist}
             />
             <Textarea
                 id="article_content"
@@ -86,8 +89,9 @@ const ArticleAdd = () => {
                 onChange={handleChange}
                 name="article_content"
                 type="text"
+                disabled={!loggedInUser.isJournalist}
             />
-            <div className={"lx-2"}><AppButton onClick={createArticle}>Add</AppButton></div>
+            <div className={"lx-2"}><AppButton onClick={createArticle} disabled={!loggedInUser.isJournalist}>Add</AppButton></div>
         </AppContainer>
     );
 };

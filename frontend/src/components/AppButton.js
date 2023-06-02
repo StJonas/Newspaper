@@ -1,8 +1,8 @@
 import {Button} from "flowbite-react";
 
-const AppButton = ({children, onClick}) => {
+const AppButton = ({children, onClick, disabled}) => {
     return (
-        <Button onClick={onClick}>{children}</Button>
+        <Button onClick={onClick} disabled={disabled}>{children}</Button>
     );
 };
 
