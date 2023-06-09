@@ -1,7 +1,7 @@
 import {faker} from "@faker-js/faker";
 
-const USERS_NUM = 1000;
-const JOURNALIST_NUM = USERS_NUM - 900;
+const USERS_NUM = 700;
+const JOURNALIST_NUM = USERS_NUM - 300;
 const ARTICLES_NUM = JOURNALIST_NUM * 15;
 const COMMENTS_NUM = ARTICLES_NUM * 3;
 const CATEGORY_NUM = 50;

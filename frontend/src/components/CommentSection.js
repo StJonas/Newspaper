@@ -19,7 +19,7 @@ const CommentSection = ({articleId}) => {
 
     useEffect(() => {
         reloadComments();
-    }, []);
+    });
 
     const reloadComments = () => {
         fetchAllComments();

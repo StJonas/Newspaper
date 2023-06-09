@@ -19,6 +19,11 @@ function loadEnv() {
     env.MYSQL_USERNAME = process.env.MYSQL_USERNAME;
     env.MYSQL_PASSWORD = process.env.MYSQL_PASSWORD;
     env.MYSQL_DATABASE = process.env.MYSQL_DATABASE;
+    env.MONGODB_HOST = process.env.MONGODB_HOST;
+    env.MONGODB_PORT = process.env.MONGODB_PORT;
+    env.MONGODB_DATABASE = process.env.MONGODB_DATABASE;
+    env.MONGODB_USERNAME = process.env.MONGODB_USERNAME;
+    env.MONGODB_PASSWORD = process.env.MONGODB_PASSWORD;
     env.HTTP_PORT = process.env.HTTP_PORT;
     env.HTTPS_PORT = process.env.HTTPS_PORT;
     return env;

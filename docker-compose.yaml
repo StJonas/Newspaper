@@ -2,6 +2,7 @@ version: "3.8"
 
 services:
   frontend:
+    container_name: frontend
     build: ./frontend
     ports:
       - "80:80"
@@ -12,26 +13,35 @@ services:
       - frontend_backend
 
   backend:
+    container_name: backend
     build: ./backend
     ports:
       - "1080:1080"
       - "1443:1443"
     depends_on:
       - mysql
+      - mongo
     environment:
       MYSQL_HOST: mysql
       MYSQL_PORT: 3306
       MYSQL_DATABASE: newspaper
       MYSQL_USERNAME: user
       MYSQL_PASSWORD: password
+      MONGODB_HOST: mongodb
+      MONGODB_PORT: 27017
+      MONGODB_DATABASE: newspaper
+      MONGODB_USERNAME: user
+      MONGODB_PASSWORD: password
       HTTPS_PORT: 1443
       HTTP_PORT: 1080
     networks:
       - frontend_backend
       - backend_mysql
+      - backend_mongo
 
   mysql:
     image: mysql:8.0
+    container_name: mysql
     environment:
       MYSQL_USER: user
       MYSQL_DATABASE: newspaper
@@ -45,9 +55,26 @@ services:
       - ./mysql/scripts:/docker-entrypoint-initdb.d
       - mysqldb:/var/lib/mysql
 
+  mongo:
+    image: mongo:5.0
+    container_name: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: newspaper
+    ports:
+      - "27017:27017"
+    networks:
+      - backend_mongo
+    volumes:
+      - ./mongo/scripts:/docker-entrypoint-initdb.d
+      - mongodb:/data/db
+
 volumes:
   mysqldb:
+  mongodb:
 
 networks:
+  backend_mongo:
   backend_mysql:
   frontend_backend:

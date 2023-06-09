@@ -1,5 +1,5 @@
 import {Dialog, Transition} from '@headlessui/react'
-import {Fragment, useState} from 'react'
+import {Fragment} from 'react'
 
 // <1> Example for a Dialog of package @headlessui/react: https://headlessui.com/react/dialog
 

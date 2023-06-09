@@ -6,7 +6,7 @@ import {useNavigate} from 'react-router-dom';
 import {ARTICLES_LINK} from "../assets/constants";
 import AppContainer from "../components/AppContainer";
 import AppButton from "../components/AppButton";
-import {H3, Text} from "../components/Typography";
+import {H3} from "../components/Typography";
 import {Textarea, TextInput} from "flowbite-react";
 import CommentDialog from "../components/CommentDialog.js";
 

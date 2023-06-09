@@ -1,7 +1,7 @@
 import React from 'react';
 import CommentSection from "../components/CommentSection";
 import {ARTICLES_LINK} from "../assets/constants";
-import {H2, H3, Text} from "../components/Typography";
+import {H2, H3} from "../components/Typography";
 import {useLocation} from "react-router-dom";
 import {useEffect} from 'react';
 import {useState} from 'react';

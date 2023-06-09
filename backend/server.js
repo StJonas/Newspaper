@@ -5,7 +5,7 @@ import http from "http";
 import fs from "fs";
 import {env} from "./env/envConfig.js";
 import {importData} from "./database/importData.js";
-import createDatabaseCon from "./database/databaseCon.js";
+import createDatabaseCon from "./database/dbConMySQL.js";
 import {QueryTypes, Sequelize} from "sequelize";
 
 const app = express();
@@ -317,3 +317,4 @@ app.get("/categoryReport", async (req, res) => {
 //TODO: HealthChecks for Database
 //TODO: migrate to nosql
 //TODO: user drop down takes ages to load
+//TODO: remove dev env settings
