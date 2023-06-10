@@ -4,14 +4,15 @@ db.createCollection("journalist", {
   validator: {
     $jsonSchema: {
       bsonType: "object",
+      required: ["employee_id", "first_name", "last_name", "birthday"],
       properties: {
         employee_id: {
           bsonType: "number",
-          description: "the employee ID",
-          required: true
+          description: "the employee ID"
         },
         user: {
           bsonType: "object",
+          required: ["_id", "username"],
           properties: {
             _id: {
               bsonType: "objectId",
@@ -25,18 +26,15 @@ db.createCollection("journalist", {
         },
         first_name: {
           bsonType: "string",
-          description: "the first name",
-          required: true
+          description: "the first name"
         },
         last_name: {
           bsonType: "string",
-          description: "the last name",
-          required: true
+          description: "the last name"
         },
         birthday: {
           bsonType: "date",
-          description: "the date of birth",
-          required: true
+          description: "the date of birth"
         }
       }
     }

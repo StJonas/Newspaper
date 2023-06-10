@@ -4,21 +4,19 @@ db.createCollection("user", {
   validator: {
     $jsonSchema: {
       bsonType: "object",
+      required: ["email", "username", "password"],
       properties: {
         email: {
           bsonType: "string",
-          description: "email of the user",
-          required: true
+          description: "email of the user"
         },
         username: {
           bsonType: "string",
-          description: "the username of the user",
-          required: true
+          description: "the username of the user"
         },
         password: {
           bsonType: "string",
-          description: "password",
-          required: true
+          description: "password"
         },
         following: {
           bsonType: "array",
@@ -33,5 +31,5 @@ db.createCollection("user", {
   }
 });
 
-db.user.createIndex({ "username": 1 }, { unique: true });
+db.user.createIndex({ username: 1 }, { unique: true });
 db.user.createIndex({ email: 1 }, { unique: true });

@@ -164,7 +164,6 @@ app.put("/switchDatabase", async (req, res) => {
 
 //TODO: check nginx setting
 //TODO: configure environment variables (backend port usw.) for frontend
-//TODO: ORM: Mongoose
 //TODO: Login ListBox is under Report table. it should be above it
 //TODO: Check what is wrong with update fields
 //TODO: HealthChecks for Database

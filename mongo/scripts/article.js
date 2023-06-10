@@ -4,6 +4,7 @@ db.createCollection("article", {
   validator: {
     $jsonSchema: {
       bsonType: "object",
+      required: ["publish_time", "title", "subtitle", "article_content"],
       properties: {
         journalist: {
           bsonType: "object",
@@ -24,29 +25,26 @@ db.createCollection("article", {
         },
         publish_time: {
           bsonType: "date",
-          description: "the publish time",
-          required: true
+          description: "the publish time"
         },
         title: {
           bsonType: "string",
-          description: "the title",
-          required: true
+          description: "the title"
         },
         subtitle: {
           bsonType: "string",
-          description: "the subtitle",
-          required: true
+          description: "the subtitle"
         },
         article_content: {
           bsonType: "string",
-          description: "the article content",
-          required: true
+          description: "the article content"
         },
         categories: {
           bsonType: "array",
           description: "the categories",
           items: {
             bsonType: "object",
+            required: ["label", "color_code"],
             properties: {
               label: {
                 bsonType: "string",
@@ -64,9 +62,11 @@ db.createCollection("article", {
           description: "the comments",
           items: {
             bsonType: "object",
+            required: ["user", "comment_content", "comment_time"],
             properties: {
               user: {
                 bsonType: "object",
+                required: ["_id", "username"],
                 properties: {
                   _id: {
                     bsonType: "objectId",
