@@ -1,42 +1,42 @@
 import {QueryTypes, Sequelize} from "sequelize";
 import {importMySqlData} from "./importMySqlData.js";
 import createDatabaseCon from "./dbConMySQL.js";
+
 class MySqlService {
     constructor() {
         this.database = createDatabaseCon();
     }
 
     async importData() {
-        this.database['sequelize'].sync().then(() => {
-            importMySqlData(this.database).then(
-                () => {
-                    return "Data imported successfully";
-                },
-                (error) => {
-                    console.error("Error importing data: " + error);
-                    throw error;
-                }
-            );
-        });
-    }
-
-    async getLatestArticles() {
-        const selectQuery = "SELECT * FROM newspaper.article ORDER BY publish_time DESC LIMIT 50";
-        return await this.database['sequelize'].query(selectQuery, {type: QueryTypes.SELECT});
-    }
-
-    async getArticle(articleId) {
         try {
-            return await this.database.article.findOne({
-                where: {
-                    article_id: articleId,
-                },
-            });
+            await this.database['sequelize'].sync();
+            await importMySqlData(this.database);
+            return {message: "Data imported successfully"};
         } catch (error) {
-            console.error('Error retrieving article:', error);
+            console.error("Error importing data: " + error);
             throw error;
         }
     }
+
+    async getLatestArticles() {
+        return await this.database['sequelize'].query(
+            "SELECT * FROM newspaper.article ORDER BY publish_time DESC LIMIT 50",
+            {type: QueryTypes.SELECT}
+        );
+    }
+
+    // async getArticle(articleId) {
+    //     try {
+    //         return await this.database.article.findOne({
+    //             where: {
+    //                 article_id: articleId,
+    //             },
+    //         });
+    //     } catch (error) {
+    //         console.error('Error retrieving article:', error);
+    //         throw error;
+    //     }
+    // }
 
     async insertArticle(title, subtitle, article_content, journalist_id) {
         try {
@@ -59,6 +59,7 @@ class MySqlService {
             };
 
         } catch (error) {
+            console.error('Error inserting article:', error);
             throw error;
         }
     }
@@ -91,7 +92,7 @@ class MySqlService {
                 },
             });
         } catch (error) {
-            console.error('Error retrieving article:', error);
+            console.error('Error deleting article:', error);
             throw error;
         }
     }
@@ -145,17 +146,17 @@ class MySqlService {
                 comment_content: comment.comment_content
             }));
         } catch (error) {
+            console.error("Error retrieving comments:", error);
             throw error;
         }
     }
 
     async insertComment(article_id, user_id, comment_content) {
-
-        if (article_id === null || article_id === '' || user_id === null || user_id === '' || comment_content === null || comment_content === '') {
-            return "Invalid input: input cannot be null or empty";
-        }
-
         try {
+            if (article_id === null || article_id === '' || user_id === null || user_id === '' || comment_content === null || comment_content === '') {
+                throw new Error("Invalid input: input cannot be null or empty");
+            }
+
             const newComment = await this.database.comment.create({
                 article_id: article_id,
                 user_id: user_id,
@@ -168,6 +169,7 @@ class MySqlService {
             };
 
         } catch (error) {
+            console.error("Error inserting comment:", error);
             throw error;
         }
     }
@@ -236,7 +238,7 @@ class MySqlService {
                 // limit: 10,
             });
         } catch (error) {
-            console.error('Error retrieving average number of comments per article:', error);
+            console.error('Error retrieving category report:', error);
             throw error;
         }
     }

@@ -1,7 +1,7 @@
 import {DataTypes, Sequelize} from "sequelize";
 import {env} from "../../env/envConfig.js";
 
-export default async function createDatabaseCon() {
+export default function createDatabaseCon() {
     const database = {
         sequelize: getSequelize()
     };

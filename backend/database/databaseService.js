@@ -20,31 +20,31 @@ class DatabaseService {
     }
 
     async importData() {
-        return this.currentDb.importData();
+        return await this.currentDb.importData();
     }
 
     async getLatestArticles() {
-        return this.currentDb.getLatestArticles();
+        return await this.currentDb.getLatestArticles();
     }
 
-    async getArticle(articleId) {
-        return this.currentDb.getArticle(articleId);
-    }
+    // async getArticle(articleId) {
+    //     return this.currentDb.getArticle(articleId);
+    // }
 
     async insertArticle(title, subtitle, article_content, journalist_id) {
-        return this.currentDb.insertArticle(title, subtitle, article_content, journalist_id);
+        return await this.currentDb.insertArticle(title, subtitle, article_content, journalist_id);
     }
 
     async updateArticle(articleId, title, subtitle, article_content) {
-        return this.currentDb.updateArticle(articleId, title, subtitle, article_content);
+        return await this.currentDb.updateArticle(articleId, title, subtitle, article_content);
     }
 
     async deleteArticle(articleId) {
-        return this.currentDb.deleteArticle(articleId);
+        return await this.currentDb.deleteArticle(articleId);
     }
 
     async getUsers() {
-        return this.currentDb.getUsers();
+        return await this.currentDb.getUsers();
     }
 
     async getCommentsOfArticle(articleId) {
@@ -52,7 +52,7 @@ class DatabaseService {
     }
 
     async insertComment(article_id, user_id, comment_content) {
-        return this.currentDb.insertComment(article_id, user_id, comment_content);
+        return await this.currentDb.insertComment(article_id, user_id, comment_content);
     }
 
     async getArticleReport() {
@@ -60,7 +60,7 @@ class DatabaseService {
     }
 
     async getCategoryReport() {
-        return this.currentDb.getCategoryReport();
+        return await this.currentDb.getCategoryReport();
     }
 
 }
