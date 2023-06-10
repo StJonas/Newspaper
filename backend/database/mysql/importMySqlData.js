@@ -252,7 +252,7 @@ async function insertUserFollow(numberOfUserFollow, user_follow, users) {
     }
 }
 
-export async function importData(databaseCon) {
+export async function importMySqlData(databaseCon) {
     const sequelize = databaseCon['sequelize'];
     const user = databaseCon['user'];
     const journalist = databaseCon['journalist'];

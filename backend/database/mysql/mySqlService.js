@@ -1,0 +1,246 @@
+import {QueryTypes, Sequelize} from "sequelize";
+import {importMySqlData} from "./importMySqlData.js";
+import createDatabaseCon from "./dbConMySQL.js";
+class MySqlService {
+    constructor() {
+        this.database = createDatabaseCon();
+    }
+
+    async importData() {
+        this.database['sequelize'].sync().then(() => {
+            importMySqlData(this.database).then(
+                () => {
+                    return "Data imported successfully";
+                },
+                (error) => {
+                    console.error("Error importing data: " + error);
+                    throw error;
+                }
+            );
+        });
+    }
+
+    async getLatestArticles() {
+        const selectQuery = "SELECT * FROM newspaper.article ORDER BY publish_time DESC LIMIT 50";
+        return await this.database['sequelize'].query(selectQuery, {type: QueryTypes.SELECT});
+    }
+
+    async getArticle(articleId) {
+        try {
+            return await this.database.article.findOne({
+                where: {
+                    article_id: articleId,
+                },
+            });
+        } catch (error) {
+            console.error('Error retrieving article:', error);
+            throw error;
+        }
+    }
+
+    async insertArticle(title, subtitle, article_content, journalist_id) {
+        try {
+            const journalist = await this.database.journalist.findOne({
+                where: {
+                    user_id: journalist_id,
+                },
+            });
+
+            const newArticle = await this.database.article.create({
+                title: title,
+                subtitle: subtitle,
+                article_content: article_content,
+                journalist_id: journalist.employee_id
+            });
+
+            return {
+                message: 'Article created successfully',
+                article: newArticle
+            };
+
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async updateArticle(articleId, title, subtitle, article_content) {
+        try {
+            return await this.database.article.update(
+                {
+                    title: title,
+                    subtitle: subtitle,
+                    article_content: article_content
+                },
+                {
+                    where: {
+                        article_id: articleId
+                    }
+                }
+            );
+        } catch (error) {
+            console.error('Error updating article:', error);
+            throw error;
+        }
+    }
+
+    async deleteArticle(articleId) {
+        try {
+            return await this.database.article.destroy({
+                where: {
+                    article_id: articleId,
+                },
+            });
+        } catch (error) {
+            console.error('Error retrieving article:', error);
+            throw error;
+        }
+    }
+
+    async getUsers() {
+        try {
+            return await this.database.user.findAll({
+                attributes: [
+                    'user_id',
+                    'username',
+                    [
+                        Sequelize.literal('CASE WHEN journalist.user_id IS NOT NULL THEN TRUE ELSE FALSE END'),
+                        'isJournalist'
+                    ]
+                ],
+                include: [
+                    {
+                        model: this.database.journalist,
+                        as: 'journalist',
+                        attributes: []
+                    }
+                ]
+            });
+        } catch (error) {
+            console.error("Error retrieving users:", error);
+            throw error;
+        }
+    }
+
+    async getCommentsOfArticle(articleId) {
+        try {
+            const comments = await this.database.comment.findAll({
+                where: {
+                    article_id: articleId
+                },
+                include: [
+                    {
+                        model: this.database.user,
+                        attributes: ['username']
+                    }
+                ],
+                order: [['comment_time', 'DESC']]
+            });
+
+            return comments.map((comment) => ({
+                article_id: comment.article_id,
+                comment_id: comment.comment_id,
+                user_id: comment.user_id,
+                username: (comment.user ? comment.user.username : null),
+                comment_time: comment.comment_time,
+                comment_content: comment.comment_content
+            }));
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async insertComment(article_id, user_id, comment_content) {
+
+        if (article_id === null || article_id === '' || user_id === null || user_id === '' || comment_content === null || comment_content === '') {
+            return "Invalid input: input cannot be null or empty";
+        }
+
+        try {
+            const newComment = await this.database.comment.create({
+                article_id: article_id,
+                user_id: user_id,
+                comment_content: comment_content
+            });
+
+            return {
+                message: 'Comment created successfully',
+                comment: newComment
+            };
+
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async getArticleReport() {
+        try {
+            return await this.database.journalist.findAll({
+                attributes: [
+                    'employee_id',
+                    [Sequelize.literal('CONCAT(last_name, " ", first_name)'), 'fullName'],
+                    [
+                        Sequelize.literal(`
+                        (SELECT COUNT(*) FROM article a1 WHERE a1.journalist_id = journalist.employee_id 
+                        AND a1.publish_time >= DATE_SUB(NOW(), INTERVAL 1 YEAR))`),
+                        'publishedArticles'
+                    ],
+                    [
+                        Sequelize.literal(`
+                        (SELECT MAX(title) FROM article a1 WHERE a1.journalist_id = journalist.employee_id 
+                        AND a1.publish_time >= DATE_SUB(NOW(), INTERVAL 1 YEAR))`),
+                        'recentArticleTitle'
+                    ]
+                ],
+                include: [
+                    {
+                        model: this.database.user,
+                        as: 'user',
+                        attributes: ['username']
+                    }
+                ],
+                order: [[Sequelize.literal('publishedArticles'), 'DESC']],
+                limit: 10,
+            });
+        } catch (error) {
+            console.error("Error retrieving article report:", error);
+            throw error;
+        }
+    }
+
+    async getCategoryReport() {
+        try {
+            return await this.database.category.findAll({
+                attributes: [
+                    'label',
+                    [
+                        this.database.sequelize.literal('COUNT(*) / COUNT(DISTINCT article_category.article_id)'),
+                        'avgNumOfCmt',
+                    ],
+                ],
+                include: [
+                    {
+                        model: this.database['article_category'],
+                        as: 'article_category',
+                        attributes: [],
+                        include: [
+                            {
+                                model: this.database['comment'],
+                                as: 'comments',
+                                attributes: [],
+                            },
+                        ],
+                    },
+                ],
+                group: ['category.category_id'],
+                order: [[this.database.sequelize.literal('avgNumOfCmt'), 'DESC']],
+                // limit: 10,
+            });
+        } catch (error) {
+            console.error('Error retrieving average number of comments per article:', error);
+            throw error;
+        }
+    }
+
+}
+
+export default MySqlService;

@@ -4,14 +4,16 @@ import https from "https";
 import http from "http";
 import fs from "fs";
 import {env} from "./env/envConfig.js";
-import {importData} from "./database/importData.js";
-import createDatabaseCon from "./database/dbConMySQL.js";
+import {importMySqlData} from "./database/mysql/importMySqlData.js";
+import createDatabaseCon from "./database/mysql/dbConMySQL.js";
 import {QueryTypes, Sequelize} from "sequelize";
+import DatabaseService from "./database/databaseService.js";
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
+const database_ = new DatabaseService();
 const database = await createDatabaseCon();
 
 const backendHttpPort = env.HTTP_PORT;
@@ -30,6 +32,10 @@ httpsServer.listen(backendHttpsPort, () => {
     console.log(`Connected to backend over HTTPS on port ${backendHttpsPort}`);
 });
 
+app.get("/", (req, res) => {
+    res.json("Hello, this is the backend!");
+});
+
 app.use((req, res, next) => {
     if (req.protocol === "http") {
         const httpsUrl = `https://${req.hostname}:${backendHttpsPort}${req.originalUrl}`;
@@ -39,6 +45,10 @@ app.use((req, res, next) => {
 });
 
 app.get("/articles", async (req, res) => {
+
+    // const result = await database_.getLatestArticles();
+    // return res.json(result);
+
     const selectQuery = "SELECT * FROM newspaper.article ORDER BY publish_time DESC LIMIT 50";
     const results = await database['sequelize'].query(selectQuery, {type: QueryTypes.SELECT});
     return res.json(results);
@@ -46,6 +56,12 @@ app.get("/articles", async (req, res) => {
 
 app.get("/articles/:articleId", async (req, res) => {
     const articleId = req.params['articleId'];
+
+    // try {
+    //     return await database_.getArticle(articleId);
+    // }catch (error) {
+    //     return res.status(500).json({error: 'Failed to retrieve article'});
+    // }
 
     try {
         const result = await database.article.findOne({
@@ -134,7 +150,7 @@ app.put("/articles/:articleId", async (req, res) => {
 
 app.post("/importData", (req, res) => {
     database['sequelize'].sync().then(() => {
-        importData(database).then(
+        importMySqlData(database).then(
             (value) => {
                 res.send("Data imported successfully");
             },
@@ -227,11 +243,6 @@ app.post("/comments", async (req, res) => {
     } catch (error) {
         return res.status(500).send(error);
     }
-});
-
-
-app.get("/", (req, res) => {
-    res.json("Hello, this is the backend!");
 });
 
 app.get("/articleReport", async (req, res) => {

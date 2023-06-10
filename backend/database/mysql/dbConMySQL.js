@@ -1,5 +1,5 @@
 import {DataTypes, Sequelize} from "sequelize";
-import {env} from "../env/envConfig.js";
+import {env} from "../../env/envConfig.js";
 
 export default async function createDatabaseCon() {
     const database = {
@@ -146,7 +146,6 @@ function getArticle(sequelize, journalist) {
         timestamps: false,
     });
 }
-
 
 function getComment(sequelize, article, user) {
     return sequelize.define('comment', {
