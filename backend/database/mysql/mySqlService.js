@@ -25,19 +25,6 @@ class MySqlService {
         );
     }
 
-    // async getArticle(articleId) {
-    //     try {
-    //         return await this.database.article.findOne({
-    //             where: {
-    //                 article_id: articleId,
-    //             },
-    //         });
-    //     } catch (error) {
-    //         console.error('Error retrieving article:', error);
-    //         throw error;
-    //     }
-    // }
-
     async insertArticle(title, subtitle, article_content, journalist_id) {
         try {
             const journalist = await this.database.journalist.findOne({
