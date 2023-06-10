@@ -7,15 +7,21 @@ class DatabaseService {
         this.dbIsMysql = true;
     }
 
-    switchDb(){
+    async switchDb(){
         if(this.dbIsMysql) {
             this.currentDb = new MongoDbService();
             this.dbIsMysql = false;
+            return {
+                message: "Switched to MongoDB"
+            }
         }
         else
         {
             this.currentDb = new MySqlService();
             this.dbIsMysql = true;
+            return {
+                message: "Switched to MySQL"
+            }
         }
     }
 

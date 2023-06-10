@@ -8,7 +8,7 @@ import React, {useEffect, useState} from "react";
 import AppContainer from "./components/AppContainer";
 import {H1, Text} from "./components/Typography";
 import AppButton from "./components/AppButton";
-import {IMPORT_DATA_LINK, USERS_LINK} from "./assets/constants";
+import {DB_SWITCH_LINK, IMPORT_DATA_LINK, USERS_LINK} from "./assets/constants";
 import axios from "axios";
 import UserList from "./components/UserList";
 import {Navbar, Spinner} from "flowbite-react";
@@ -23,6 +23,7 @@ function App() {
     const [isJournalist, setJournalist] = useState(false);
     const dispatch = useDispatch();
     const loggedInUser = useSelector(state => state.loggedInUser);
+    const [switchBTNloading, setSwitchBTNloading] = useState(false);
 
     const importData = async () => {
         try {
@@ -64,6 +65,18 @@ function App() {
         }
       }, [loggedInUser]);
 
+    const switchDB = async () => {
+        try {
+            setSwitchBTNloading(true);
+            await axios.put(DB_SWITCH_LINK);
+            setSwitchBTNloading(false);
+            window.location.reload();
+        } catch (error) {
+            setSwitchBTNloading(false);
+            console.log("error:", error);
+        }
+    };
+
     return (
         <AppContainer>
             <BrowserRouter>
@@ -73,6 +86,9 @@ function App() {
                     <div className="flex md:order-2">
                         <AppButton onClick={importData} disabled={loading}>
                             {loading ? 'Importing...' : 'Import Data'}
+                        </AppButton>
+                        <AppButton onClick={switchDB} disabled={switchBTNloading} classes={"ml-2"}>
+                            {loading ? 'Switching DB...' : 'Switch DB'}
                         </AppButton>
                         <div className={"flex items-center justify-center pl-3 pr-1"}><Text>Logged in User: </Text></div>
                         {usersLoaded ? (<UserList onChange={loginNewUser} items={users}/>) : (
