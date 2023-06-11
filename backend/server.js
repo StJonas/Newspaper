@@ -156,6 +156,7 @@ app.get("/categoryReport", async (req, res) => {
 app.put("/switchDatabase", async (req, res) => {
   try {
     const result = await database.switchDb();
+    console.log("Switched DB to:", (database.dbIsMysql ? "MySQL" : "MongoDB"));
     return res.json(result);
   } catch (error) {
     return res.status(500).json({ error: "Failed switching db" });
@@ -167,8 +168,5 @@ app.put("/switchDatabase", async (req, res) => {
 //TODO: Login ListBox is under Report table. it should be above it
 //TODO: Check what is wrong with update fields
 //TODO: HealthChecks for Database
-//TODO: migrate to nosql
 //TODO: user drop down takes ages to load
 //TODO: remove dev env settings
-//TODO: publish time automatisch bei mongo
-//TODO: switch back

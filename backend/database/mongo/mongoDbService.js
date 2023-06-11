@@ -25,11 +25,10 @@ class MongoDbService {
   async getLatestArticles() {
     await this.client.connect();
     try {
-      const result = await this.database
+      return await this.database
           .collection("article")
           .find({})
           .toArray();
-      return result;
     } catch (error) {
       console.error("Error retrieving articles:", error);
       throw error;
@@ -91,13 +90,19 @@ class MongoDbService {
     return [];
   }
 
-  async getCommentsOfArticle(articleId) {}
+  async getCommentsOfArticle(articleId) {
+    return [];
+  }
 
   async insertComment(article_id, user_id, comment_content) {}
 
-  async getArticleReport() {}
+  async getArticleReport() {
+    return [];
+  }
 
-  async getCategoryReport() {}
+  async getCategoryReport() {
+    return [];
+  }
 }
 
 export default MongoDbService;
