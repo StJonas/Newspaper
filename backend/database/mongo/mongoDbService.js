@@ -1,31 +1,42 @@
-import { env } from "../../env/envConfig.js";
-import { MongoClient } from "mongodb";
+import {env} from "../../env/envConfig.js";
+import {MongoClient} from "mongodb";
+import {importMongoDbData} from "./importMongoDbData.js";
 
 class MongoDbService {
   constructor() {
-    const url = `mongodb://${env.MONGODB_USERNAME}:${env.MONGODB_PASSWORD}@${env.MONGODB_HOST}:${env.MONGODB_PORT}`;
-    this.client = new MongoClient(url);
-
-    // Access the database
+    this.client = new MongoClient(`mongodb://${env.MONGODB_USERNAME}:${env.MONGODB_PASSWORD}@${env.MONGODB_HOST}:${env.MONGODB_PORT}`);
     this.database = this.client.db(env.MONGODB_DATABASE);
   }
 
-  async importData() {}
+  async importData() {
+    try {
+      await this.client.connect();
+      await importMongoDbData(this.database);
+      return {message: "Data imported successfully"};
+    } catch (error) {
+      console.error("Error importing data: " + error);
+      throw error;
+    }
+    finally {
+      await this.client.close();
+    }
+  }
 
   async getLatestArticles() {
-    this.client.connect();
-    console.log("i was here");
+    await this.client.connect();
     try {
-      const articles = await this.database
-        .collection("article")
-        .find({})
-        .toArray();
-      this.client.close();
-      return articles;
+      const result = await this.database
+          .collection("article")
+          .find({})
+          .toArray();
+      return result;
     } catch (error) {
-      this.client.close();
       console.error("Error retrieving articles:", error);
       throw error;
+    }
+    finally
+    {
+      await this.client.close();
     }
   }
 
@@ -76,7 +87,9 @@ class MongoDbService {
     }
   }
 
-  async getUsers() {}
+  async getUsers() {
+    return [];
+  }
 
   async getCommentsOfArticle(articleId) {}
 

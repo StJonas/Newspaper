@@ -1,4 +1,4 @@
-import {QueryTypes, Sequelize} from "sequelize";
+import {Sequelize} from "sequelize";
 import {importMySqlData} from "./importMySqlData.js";
 import createDatabaseCon from "./dbConMySQL.js";
 
@@ -19,10 +19,10 @@ class MySqlService {
     }
 
     async getLatestArticles() {
-        return await this.database['sequelize'].query(
-            "SELECT * FROM newspaper.article ORDER BY publish_time DESC LIMIT 50",
-            {type: QueryTypes.SELECT}
-        );
+        return await this.database['article'].findAll({
+            order: [['publish_time', 'DESC']],
+            limit: 50
+        });
     }
 
     async insertArticle(title, subtitle, article_content, journalist_id) {

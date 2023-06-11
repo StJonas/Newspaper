@@ -8,14 +8,13 @@ const CATEGORY_NUM = 50;
 const ARTICLE_CATEGORY_NUM = ARTICLES_NUM * 2;
 const USER_FOLLOW_NUM = USERS_NUM * 3;
 
-async function deleteAllElements(model) {
-    await model.destroy({
-        where: {},
-    }).then((numDeleted) => {
-        console.log(`${model.tableName}: Deleted ${numDeleted} rows.`);
-    }).catch((error) => {
-        console.error(`${model.tableName}: Error while deleting rows:`, error);
-    });
+async function deleteAllElements(col) {
+    try {
+        const deleteResult = await col.deleteMany({});
+        console.log(`${col.collectionName}: Deleted ${deleteResult.deletedCount} rows.`);
+    } catch (error) {
+        console.error(`${col.name}: Error while deleting rows:`, error);
+    }
 }
 
 async function resetAutoIncrement(sequelize, model) {
@@ -62,14 +61,14 @@ async function insertRandomUsers(numberOfUsers, user) {
                 password,
             });
         }
-        await user.bulkCreate(newUsers);
+        await user.insertMany(newUsers);
         console.log(`${numberOfUsers} users inserted successfully.`);
     } catch (error) {
         console.error(`${user.tableName}: Error inserting users: `, error);
     }
 }
 
-async function insertRandomJournalists(numberOfJournalists, journalist, userIDs) {
+async function insertRandomJournalists(numberOfJournalists, journalist, users) {
     try {
         const newJournalist = [];
         const maxId = 999999;
@@ -83,21 +82,21 @@ async function insertRandomJournalists(numberOfJournalists, journalist, userIDs)
             return employeeId;
         }
 
-        for (const user_id of userIDs) {
+        for (const u of users) {
             const employee_id = generateUniqueEmpolyeeId();
+            const user = {_id: u._id, username: u.username};
             const first_name = faker.person.firstName();
             const last_name = faker.person.lastName();
             const birthday = faker.date.birthdate({min: 18, max: 65, mode: 'age'});
             newJournalist.push({
                 employee_id,
-                user_id,
+                user,
                 first_name,
                 last_name,
                 birthday,
             });
         }
-
-        await journalist.bulkCreate(newJournalist);
+        await journalist.insertMany(newJournalist);
         console.log(`${numberOfJournalists} journalists inserted successfully.`);
     } catch (error) {
         console.error(`${journalist.tableName}: Error inserting journalists: `, error);
@@ -219,7 +218,8 @@ async function insertArticleCategory(numberOfArticleCategory, article_category, 
     }
 }
 
-async function insertUserFollow(numberOfUserFollow, user_follow, users) {
+async function insertUserFollow(numberOfUserFollow, user, insertedUsers) {
+    const users = insertedUsers.map(user => user._id);
     try {
         const newUserFollow = [];
 
@@ -252,54 +252,42 @@ async function insertUserFollow(numberOfUserFollow, user_follow, users) {
     }
 }
 
-export async function importMySqlData(databaseCon) {
-    const sequelize = databaseCon['sequelize'];
-    const user = databaseCon['user'];
-    const journalist = databaseCon['journalist'];
-    const article = databaseCon['article'];
-    const comment = databaseCon['comment'];
-    const category = databaseCon['category'];
-    const article_category = databaseCon['article_category'];
-    const user_follow = databaseCon['user_follow'];
+export async function importMongoDbData(databaseCon) {
+    const user = databaseCon.collection('user');
+    const journalist = databaseCon.collection('journalist');
+    const article = databaseCon.collection('article');
 
-    console.log("Mysql: Importing Data...");
+    console.log("MongoDB: Importing Data...");
 
     try {
-        await deleteAllElements(comment);
-        await deleteAllElements(article_category);
         await deleteAllElements(article);
-        await deleteAllElements(category);
         await deleteAllElements(journalist);
-        await deleteAllElements(user_follow);
         await deleteAllElements(user);
-
-        await resetAutoIncrement(sequelize, user);
-        await resetAutoIncrement(sequelize, article);
-        await resetAutoIncrement(sequelize, category);
 
         await insertRandomUsers(USERS_NUM, user);
 
-        const insertedUsers = await user.findAll({attributes: ['user_id']});
-        const userIDs = insertedUsers.map(u => u.user_id);
-        const journalistUserIDs = userIDs.slice(0, JOURNALIST_NUM);
+        const insertedUsers = await user.find({}).toArray();
 
-        await insertRandomJournalists(JOURNALIST_NUM, journalist, journalistUserIDs);
-        const insertedJournalists = await journalist.findAll({attributes: ['employee_id']});
-        const journalistIDs = insertedJournalists.map(j => j.employee_id);
+        // await insertUserFollow(USER_FOLLOW_NUM, user, insertedUsers);
 
-        await insertRandomArticles(ARTICLES_NUM, article, journalistIDs);
-        const insertedArticles = await article.findAll({attributes: ['article_id']});
-        const articleIDs = insertedArticles.map(a => a.article_id);
+        const journalistUsers = insertedUsers.slice(0, JOURNALIST_NUM);
 
-        await insertRandomComments(COMMENTS_NUM, comment, articleIDs, userIDs);
+        await insertRandomJournalists(JOURNALIST_NUM, journalist, journalistUsers);
+        // const insertedJournalists = await journalist.findAll({attributes: ['employee_id']});
+        // const journalistIDs = insertedJournalists.map(j => j.employee_id);
+        //
+        // await insertRandomArticles(ARTICLES_NUM, article, journalistIDs);
+        // const insertedArticles = await article.findAll({attributes: ['article_id']});
+        // const articleIDs = insertedArticles.map(a => a.article_id);
+        //
+        // await insertRandomComments(COMMENTS_NUM, comment, articleIDs, userIDs);
+        //
+        // await insertRandomCategory(CATEGORY_NUM, category);
+        // const insertedCategories = await category.findAll({attributes: ['category_id']});
+        // const categoryIDs = insertedCategories.map(c => c['category_id']);
+        //
+        // await insertArticleCategory(ARTICLE_CATEGORY_NUM, article_category, articleIDs, categoryIDs);
 
-        await insertRandomCategory(CATEGORY_NUM, category);
-        const insertedCategories = await category.findAll({attributes: ['category_id']});
-        const categoryIDs = insertedCategories.map(c => c['category_id']);
-
-        await insertArticleCategory(ARTICLE_CATEGORY_NUM, article_category, articleIDs, categoryIDs);
-
-        await insertUserFollow(USER_FOLLOW_NUM, user_follow, userIDs);
         console.log("Imported!")
 
     } catch (error) {

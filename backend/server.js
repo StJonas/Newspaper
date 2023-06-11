@@ -10,7 +10,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-const database_ = new DatabaseService();
+const database = new DatabaseService();
 
 const backendHttpPort = env.HTTP_PORT;
 const backendHttpsPort = env.HTTPS_PORT;
@@ -43,7 +43,7 @@ app.use((req, res, next) => {
 });
 
 app.get("/articles", async (req, res) => {
-  const result = await database_.getLatestArticles();
+  const result = await database.getLatestArticles();
   return res.json(result);
 });
 
@@ -51,7 +51,7 @@ app.delete("/articles/:articleId", async (req, res) => {
   const articleId = req.params["articleId"];
 
   try {
-    const result = await database_.deleteArticle(articleId);
+    const result = await database.deleteArticle(articleId);
     return res.json(result);
   } catch (error) {
     return res.status(500).json({ error: "Failed to delete article" });
@@ -62,7 +62,7 @@ app.post("/articles", async (req, res) => {
   const { title, subtitle, article_content, journalist_id } = req.body;
 
   try {
-    const result = await database_.insertArticle(
+    const result = await database.insertArticle(
       title,
       subtitle,
       article_content,
@@ -79,7 +79,7 @@ app.put("/articles/:articleId", async (req, res) => {
   const { title, subtitle, article_content } = req.body;
 
   try {
-    const result = database_.updateArticle(
+    const result = database.updateArticle(
       articleId,
       title,
       subtitle,
@@ -93,7 +93,7 @@ app.put("/articles/:articleId", async (req, res) => {
 
 app.post("/importData", async (req, res) => {
   try {
-    const result = await database_.importData();
+    const result = await database.importData();
     return res.json(result);
   } catch (error) {
     return res.status(500).json({ error: "Error importing data!" });
@@ -102,7 +102,7 @@ app.post("/importData", async (req, res) => {
 
 app.get("/users", async (req, res) => {
   try {
-    const result = await database_.getUsers();
+    const result = await database.getUsers();
     return res.json(result);
   } catch (error) {
     return res.status(500).json({ error: "Failed to retrieve users" });
@@ -113,7 +113,7 @@ app.get("/comments/:articleId", async (req, res) => {
   const articleId = req.params.articleId;
 
   try {
-    const result = await database_.getCommentsOfArticle(articleId);
+    const result = await database.getCommentsOfArticle(articleId);
     return res.json(result);
   } catch (error) {
     return res.status(500).send({ error: "Failed to retrieve comments" });
@@ -124,7 +124,7 @@ app.post("/comments", async (req, res) => {
   const { article_id, user_id, comment_content } = req.body;
 
   try {
-    const result = await database_.insertComment(
+    const result = await database.insertComment(
       article_id,
       user_id,
       comment_content
@@ -137,7 +137,7 @@ app.post("/comments", async (req, res) => {
 
 app.get("/articleReport", async (req, res) => {
   try {
-    const results = await database_.getArticleReport();
+    const results = await database.getArticleReport();
     return res.json(results);
   } catch (error) {
     return res.status(500).json({ error: "Error retrieving article report" });
@@ -146,7 +146,7 @@ app.get("/articleReport", async (req, res) => {
 
 app.get("/categoryReport", async (req, res) => {
   try {
-    const result = await database_.getCategoryReport();
+    const result = await database.getCategoryReport();
     return res.json(result);
   } catch (error) {
     return res.status(500).json({ error: "Failed retrieving category report" });
@@ -155,7 +155,7 @@ app.get("/categoryReport", async (req, res) => {
 
 app.put("/switchDatabase", async (req, res) => {
   try {
-    const result = await database_.switchDb();
+    const result = await database.switchDb();
     return res.json(result);
   } catch (error) {
     return res.status(500).json({ error: "Failed switching db" });

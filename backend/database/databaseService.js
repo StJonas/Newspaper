@@ -33,10 +33,6 @@ class DatabaseService {
         return await this.currentDb.getLatestArticles();
     }
 
-    // async getArticle(articleId) {
-    //     return this.currentDb.getArticle(articleId);
-    // }
-
     async insertArticle(title, subtitle, article_content, journalist_id) {
         return await this.currentDb.insertArticle(title, subtitle, article_content, journalist_id);
     }
