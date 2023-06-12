@@ -1,4 +1,4 @@
-import {Sequelize} from "sequelize";
+import {Sequelize, QueryTypes} from "sequelize";
 import {importMySqlData} from "./importMySqlData.js";
 import createDatabaseCon from "./dbConMySQL.js";
 
@@ -198,32 +198,42 @@ class MySqlService {
 
     async getCategoryReport() {
         try {
-            return await this.database.category.findAll({
-                attributes: [
-                    'label',
-                    [
-                        this.database.sequelize.literal('COUNT(*) / COUNT(DISTINCT article_category.article_id)'),
-                        'avgNumOfCmt',
-                    ],
-                ],
-                include: [
-                    {
-                        model: this.database['article_category'],
-                        as: 'article_category',
-                        attributes: [],
-                        include: [
-                            {
-                                model: this.database['comment'],
-                                as: 'comments',
-                                attributes: [],
-                            },
-                        ],
-                    },
-                ],
-                group: ['category.category_id'],
-                order: [[this.database.sequelize.literal('avgNumOfCmt'), 'DESC']],
-                // limit: 10,
-            });
+
+            return await this.database.sequelize.query(
+                `SELECT category.label, (COUNT(*) / COUNT(DISTINCT article_category.article_id)) AS avgNumOfCmt FROM category
+                LEFT JOIN article_category ON category.category_id = article_category.category_id
+                LEFT JOIN comment ON article_category.article_id = comment.article_id\n
+                GROUP BY category.category_id
+                ORDER BY avgNumOfCmt DESC;`,
+                { type: QueryTypes.SELECT }
+            );
+
+            // return await this.database.category.findAll({
+            //     attributes: [
+            //         'label',
+            //         [
+            //             this.database.sequelize.literal('COUNT(*) / COUNT(DISTINCT article_category.article_id)'),
+            //             'avgNumOfCmt',
+            //         ],
+            //     ],
+            //     include: [
+            //         {
+            //             model: this.database['article_category'],
+            //             as: 'article_category',
+            //             attributes: [],
+            //             include: [
+            //                 {
+            //                     model: this.database['comment'],
+            //                     as: 'comments',
+            //                     attributes: [],
+            //                 },
+            //             ],
+            //         },
+            //     ],
+            //     group: ['category.category_id'],
+            //     order: [[this.database.sequelize.literal('avgNumOfCmt'), 'DESC']],
+            //     // limit: 10,
+            // });
         } catch (error) {
             console.error('Error retrieving category report:', error);
             throw error;

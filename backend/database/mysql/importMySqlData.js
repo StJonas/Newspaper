@@ -1,12 +1,12 @@
 import {faker} from "@faker-js/faker";
 
 const USERS_NUM = 700;
-const JOURNALIST_NUM = USERS_NUM - 300;
-const ARTICLES_NUM = JOURNALIST_NUM * 15;
-const COMMENTS_NUM = ARTICLES_NUM * 3;
+const JOURNALIST_NUM = USERS_NUM - 400;
+const ARTICLES_NUM_MAX = 25;
+const COMMENTS_NUM_MAX = 5;
 const CATEGORY_NUM = 50;
-const ARTICLE_CATEGORY_NUM = ARTICLES_NUM * 2;
-const USER_FOLLOW_NUM = USERS_NUM * 3;
+const ARTICLE_CATEGORY_NUM = 2;
+const USER_FOLLOW_NUM = 3;
 
 async function deleteAllElements(model) {
     await model.destroy({
@@ -23,7 +23,7 @@ async function resetAutoIncrement(sequelize, model) {
     const query = `ALTER TABLE ${tableName}
         AUTO_INCREMENT = 1;`;
     await sequelize.query(query, {raw: true}).then(
-        (value) => {
+        () => {
             console.log(`${model.getTableName()}: Autoincrement reset.`);
         },
         (error) => {
@@ -104,31 +104,34 @@ async function insertRandomJournalists(numberOfJournalists, journalist, userIDs)
     }
 }
 
-async function insertRandomArticles(numberOfArticles, article, journalists) {
+async function insertRandomArticles(numberOfArticlesMax, article, journalists) {
     try {
         const newArticles = [];
 
-        for (let i = 0; i < numberOfArticles / journalists.length; i++) {
-            for (const journalist_id of journalists) {
+        for (const journalist_id of journalists) {
+            const numArticles = Math.floor(Math.random() * numberOfArticlesMax + 1);
+            for (let i = 0; i < numArticles; i++) {
                 const title = faker.word.noun();
                 const subtitle = faker.lorem.sentence({min: 3, max: 10});
                 const article_content = faker.lorem.text();
+                const publish_time = faker.date.past({years: 3});
                 newArticles.push({
                     journalist_id,
                     title,
                     subtitle,
                     article_content,
+                    publish_time,
                 });
             }
         }
         await article.bulkCreate(newArticles);
-        console.log(`${numberOfArticles} articles inserted successfully.`);
+        console.log(`${newArticles.length} articles inserted successfully.`);
     } catch (error) {
         console.error(`${article.tableName}: Error inserting articles: `, error);
     }
 }
 
-async function insertRandomComments(numberOfComments, comment, articles, users) {
+async function insertRandomComments(numberOfCommentsMax, comment, articles, users) {
     try {
         function getNextUserIdFunction() {
             let currIndex = 0;
@@ -145,8 +148,9 @@ async function insertRandomComments(numberOfComments, comment, articles, users) 
         const getNextUserId = getNextUserIdFunction();
 
         const newComments = [];
-        for (let i = 0; i < numberOfComments / articles.length; i++) {
-            for (const article_id of articles) {
+        for (const article_id of articles) {
+            const numComments = Math.floor(Math.random() * numberOfCommentsMax + 1);
+            for (let i = 0; i < numComments; i++) {
                 const user_id = getNextUserId();
                 const comment_content = faker.lorem.text();
                 newComments.push({
@@ -157,7 +161,7 @@ async function insertRandomComments(numberOfComments, comment, articles, users) 
             }
         }
         await comment.bulkCreate(newComments);
-        console.log(`${numberOfComments} comments inserted successfully.`);
+        console.log(`${newComments.length} comments inserted successfully.`);
     } catch (error) {
         console.error(`${comment.tableName}: Error inserting comments: `, error);
     }
@@ -203,8 +207,9 @@ async function insertArticleCategory(numberOfArticleCategory, article_category, 
             };
         })();
 
-        for (let i = 0; i < numberOfArticleCategory / articles.length; i++) {
-            for (const article_id of articles) {
+
+        for (const article_id of articles) {
+            for (let i = 0; i < numberOfArticleCategory; i++) {
                 const category_id = getNextCategoryId(article_id);
                 newArticleCategory.push({
                     article_id,
@@ -212,8 +217,9 @@ async function insertArticleCategory(numberOfArticleCategory, article_category, 
                 });
             }
         }
+
         await article_category.bulkCreate(newArticleCategory);
-        console.log(`${numberOfArticleCategory} article_categories inserted successfully.`);
+        console.log(`${newArticleCategory.length} article_categories inserted successfully.`);
     } catch (error) {
         console.error(`${article_category.tableName}: Error inserting article_categories: `, error);
     }
@@ -227,7 +233,7 @@ async function insertUserFollow(numberOfUserFollow, user_follow, users) {
             let currIndex = 0;
             return (new_following_user) => {
                 while (new_following_user === users[currIndex]
-                            || newUserFollow.some(e => e.following_user === new_following_user && e.followed_user === users[currIndex])) {
+                || newUserFollow.some(e => e.following_user === new_following_user && e.followed_user === users[currIndex])) {
                     currIndex = Math.floor(Math.random() * users.length);
                 }
                 const nextCategoryId = users[currIndex];
@@ -236,8 +242,8 @@ async function insertUserFollow(numberOfUserFollow, user_follow, users) {
             };
         })();
 
-        for (let i = 0; i < numberOfUserFollow / users.length; i++) {
-            for (const following_user of users) {
+        for (const following_user of users) {
+            for (let i = 0; i < numberOfUserFollow; i++) {
                 const followed_user = getNextUserId(following_user);
                 newUserFollow.push({
                     following_user,
@@ -246,7 +252,7 @@ async function insertUserFollow(numberOfUserFollow, user_follow, users) {
             }
         }
         await user_follow.bulkCreate(newUserFollow);
-        console.log(`${numberOfUserFollow} user_follows inserted successfully.`);
+        console.log(`${newUserFollow.length} user_follows inserted successfully.`);
     } catch (error) {
         console.error(`${user_follow.tableName}: Error inserting user_follows: `, error);
     }
@@ -287,11 +293,11 @@ export async function importMySqlData(databaseCon) {
         const insertedJournalists = await journalist.findAll({attributes: ['employee_id']});
         const journalistIDs = insertedJournalists.map(j => j.employee_id);
 
-        await insertRandomArticles(ARTICLES_NUM, article, journalistIDs);
+        await insertRandomArticles(ARTICLES_NUM_MAX, article, journalistIDs);
         const insertedArticles = await article.findAll({attributes: ['article_id']});
         const articleIDs = insertedArticles.map(a => a.article_id);
 
-        await insertRandomComments(COMMENTS_NUM, comment, articleIDs, userIDs);
+        await insertRandomComments(COMMENTS_NUM_MAX, comment, articleIDs, userIDs);
 
         await insertRandomCategory(CATEGORY_NUM, category);
         const insertedCategories = await category.findAll({attributes: ['category_id']});

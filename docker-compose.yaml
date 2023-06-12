@@ -7,6 +7,9 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    expose:
+      - 80
+      - 443
     depends_on:
       - backend
     networks:
@@ -18,6 +21,9 @@ services:
     ports:
       - "1080:1080"
       - "1443:1443"
+    expose:
+      - 1080
+      - 1443
     depends_on:
       - mysql
       - mongo
@@ -27,7 +33,7 @@ services:
       MYSQL_DATABASE: newspaper
       MYSQL_USERNAME: user
       MYSQL_PASSWORD: password
-      MONGODB_HOST: mongodb
+      MONGODB_HOST: mongo
       MONGODB_PORT: 27017
       MONGODB_DATABASE: newspaper
       MONGODB_USERNAME: user

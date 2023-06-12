@@ -23,7 +23,7 @@ const ReportJournalist = ({ classes }) => {
   return (
     <div className={`${classes}`}>
         <br/>
-        <H2>Report Category</H2>
+        <H2>Report Journalist</H2>
         <Table className={"mt-6 w-3/4"}>
             <Table.Head>
                 <Table.HeadCell>

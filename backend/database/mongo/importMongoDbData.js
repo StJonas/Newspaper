@@ -1,9 +1,9 @@
 import {faker} from "@faker-js/faker";
 
 const USERS_NUM = 700;
-const JOURNALIST_NUM = USERS_NUM - 300;
-const ARTICLES_NUM = JOURNALIST_NUM * 15;
-const COMMENTS_NUM = 3;
+const JOURNALIST_NUM = USERS_NUM - 400;
+const ARTICLES_NUM_MAX = 25;
+const COMMENTS_NUM_MAX = 5;
 const CATEGORY_NUM = 50;
 const ARTICLE_CATEGORY_NUM = 2;
 const USER_FOLLOW_NUM = 3;
@@ -89,7 +89,7 @@ async function insertRandomJournalists(numberOfJournalists, journalist, users) {
     }
 }
 
-async function insertRandomArticles(numberOfArticles, numberOfComments, numberOfCategories, numberOfCategoriesPerArticle, users, article, journalists) {
+async function insertRandomArticles(numberOfArticlesMax, numberOfCommentsMax, numberOfCategories, numberOfCategoriesPerArticle, users, article, journalists) {
     try {
         const newArticles = [];
         const newCategories = await createCategories(numberOfCategories);
@@ -100,9 +100,9 @@ async function insertRandomArticles(numberOfArticles, numberOfComments, numberOf
                 if (currIndex >= users.length) {
                     currIndex = 0;
                 }
-                const nextUserId = users[currIndex]._id;
+                const nextUser = users[currIndex];
                 currIndex++;
-                return nextUserId;
+                return nextUser;
             };
         })();
 
@@ -120,9 +120,9 @@ async function insertRandomArticles(numberOfArticles, numberOfComments, numberOf
             };
         })();
 
-
-        for (let i = 0; i < numberOfArticles / journalists.length; i++) {
-            for (const j of journalists) {
+        for (const j of journalists) {
+            const numArticles = Math.floor(Math.random() * numberOfArticlesMax + 1);
+            for (let i = 0; i < numArticles; i++) {
                 const journalist = {
                     _id: j._id,
                     first_name: j.first_name,
@@ -133,10 +133,16 @@ async function insertRandomArticles(numberOfArticles, numberOfComments, numberOf
                 const subtitle = faker.lorem.sentence({min: 3, max: 10});
                 const article_content = faker.lorem.text();
                 const comments = [];
-                for (let c = 0; c < numberOfComments; c++) {
+                const numComments = Math.floor(Math.random() * numberOfCommentsMax + 1);
+                for (let c = 0; c < numComments; c++) {
+                    const user = getNextUserId();
                     comments.push({
-                        _id: getNextUserId(),
-                        comment_content: faker.lorem.text()
+                        user: {
+                            _id: user._id,
+                            username: user.username
+                        },
+                        comment_content: faker.lorem.text(),
+                        comment_time: faker.date.between({from: publish_time}),
                     });
                 }
                 const categories = [];
@@ -156,7 +162,7 @@ async function insertRandomArticles(numberOfArticles, numberOfComments, numberOf
             }
         }
         await article.insertMany(newArticles);
-        console.log(`${numberOfArticles} articles inserted successfully.`);
+        console.log(`${newArticles.length} articles inserted successfully.`);
     } catch (error) {
         console.error(`${article.collectionName}: Error inserting articles: `, error);
     }
@@ -171,7 +177,7 @@ async function insertUserFollow(numberOfUserFollow, user, users) {
             let currIndex = 0;
             return (new_following_user, newUserFollow) => {
                 while (new_following_user === users[currIndex]._id
-                            || newUserFollow.some(e => e.following_user === new_following_user && e.followed_user === users[currIndex]._id)) {
+                || newUserFollow.some(e => e.following_user === new_following_user && e.followed_user === users[currIndex]._id)) {
                     currIndex = Math.floor(Math.random() * users.length);
                 }
                 const nextCategoryId = users[currIndex]._id;
@@ -189,8 +195,8 @@ async function insertUserFollow(numberOfUserFollow, user, users) {
             }
 
             const updateUserPromise = user.updateOne(
-                { _id: currentUser._id },
-                { $set: { following: newFollowing } }
+                {_id: currentUser._id},
+                {$set: {following: newFollowing}}
             );
             updateUserPromises.push(updateUserPromise);
         }
@@ -217,7 +223,6 @@ async function createCategories(numberOfCategories) {
     return newCategories;
 }
 
-
 export async function importMongoDbData(databaseCon) {
     const user = databaseCon.collection('user');
     const journalist = databaseCon.collection('journalist');
@@ -239,7 +244,7 @@ export async function importMongoDbData(databaseCon) {
         await insertRandomJournalists(JOURNALIST_NUM, journalist, journalistUsers);
         const insertedJournalists = await journalist.find({}).toArray();
 
-        await insertRandomArticles(ARTICLES_NUM, COMMENTS_NUM, CATEGORY_NUM, ARTICLE_CATEGORY_NUM, insertedUsers, article, insertedJournalists);
+        await insertRandomArticles(ARTICLES_NUM_MAX, COMMENTS_NUM_MAX, CATEGORY_NUM, ARTICLE_CATEGORY_NUM, insertedUsers, article, insertedJournalists);
 
         console.log("Imported!");
 

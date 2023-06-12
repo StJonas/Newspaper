@@ -30,7 +30,7 @@ function App() {
             setLoading(true);
             await axios.post(IMPORT_DATA_LINK);
             setLoading(false);
-            await fetchAllUsers().then(()=>{
+            await fetchAllUsers().then(() => {
                 window.location.reload();
             });
         } catch (error) {
@@ -59,11 +59,11 @@ function App() {
 
     useEffect(() => {
         if (loggedInUser && loggedInUser.isJournalist) {
-          setJournalist(true);
+            setJournalist(true);
         } else {
-          setJournalist(false);
+            setJournalist(false);
         }
-      }, [loggedInUser]);
+    }, [loggedInUser]);
 
     const switchDB = async () => {
         try {
@@ -80,7 +80,7 @@ function App() {
     return (
         <AppContainer>
             <BrowserRouter>
-                <H1><Link to={"/"} >Newspaper</Link></H1>
+                <H1><Link to={"/"}>Newspaper</Link></H1>
                 {/*<Text>{loggedInUser.username} {loggedInUser.user_id}</Text>*/}
                 <Navbar fluid rounded>
                     <div className="flex md:order-2">
@@ -90,20 +90,21 @@ function App() {
                         <AppButton onClick={switchDB} disabled={switchBTNloading} classes={"ml-2"}>
                             {loading ? 'Switching DB...' : 'Switch DB'}
                         </AppButton>
-                        <div className={"flex items-center justify-center pl-3 pr-1"}><Text>Logged in User: </Text></div>
+                        <div className={"flex items-center justify-center pl-3 pr-1"}><Text>Logged in User: </Text>
+                        </div>
                         {usersLoaded ? (<UserList onChange={loginNewUser} items={users}/>) : (
                             <div className={"flex items-center justify-center"}><Spinner
                                 aria-label="Center-aligned spinner example"/></div>)}
                         <Navbar.Toggle/>
                     </div>
                     <Navbar.Collapse>
-                        <Navbar.Link active href="/reports">
+                        <Navbar.Link as={Link} to="/reports" active>
                             Reports
                         </Navbar.Link>
                         {isJournalist && (
-                        <Navbar.Link active href="/add">
-                            Add Article
-                        </Navbar.Link>
+                            <Navbar.Link as={Link} to="/add" active>
+                                Add Article
+                            </Navbar.Link>
                         )}
                     </Navbar.Collapse>
                 </Navbar>
