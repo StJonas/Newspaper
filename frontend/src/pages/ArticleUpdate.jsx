@@ -12,7 +12,7 @@ import CommentDialog from "../components/CommentDialog.js";
 const ArticleUpdate = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const articleId = Number(location.pathname.split("/")[2]);
+    const articleId = location.pathname.split("/")[2];
     const [newArticle, setNewArticle] = useState({
         title: "",
         subtitle: "",
@@ -26,7 +26,7 @@ const ArticleUpdate = () => {
         const fetchArticle = async () => {
             try {
                 const res = await axios.get(ARTICLES_LINK);
-                const selected = res.data.find((article) => article.article_id === articleId);
+                const selected = res.data.find((article) => article.article_id.toString() === articleId);
                 setArticle(selected);
             } catch (error) {
                 console.log("Fetch error:" ,error);

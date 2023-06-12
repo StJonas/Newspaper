@@ -9,7 +9,6 @@ const loggedInUserSlice = createSlice({
     },
     reducers: {
         login: (state, action) => {
-            console.log();
             state.user_id = action.payload.user_id;
             state.username = action.payload.username;
             state.isJournalist = action.payload.isJournalist;

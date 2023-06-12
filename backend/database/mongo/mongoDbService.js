@@ -1,16 +1,17 @@
 import {env} from "../../env/envConfig.js";
-import {MongoClient} from "mongodb";
+import {MongoClient, ObjectId} from "mongodb";
 import {importMongoDbData} from "./importMongoDbData.js";
 
 class MongoDbService {
   constructor() {
     this.client = new MongoClient(`mongodb://${env.MONGODB_USERNAME}:${env.MONGODB_PASSWORD}@${env.MONGODB_HOST}:${env.MONGODB_PORT}`);
     this.database = this.client.db(env.MONGODB_DATABASE);
+    this.client.connect();
   }
 
   async importData() {
     try {
-      await this.client.connect();
+      //await this.client.connect();
       await importMongoDbData(this.database);
       return {message: "Data imported successfully"};
     } catch (error) {
@@ -18,38 +19,51 @@ class MongoDbService {
       throw error;
     }
     finally {
-      await this.client.close();
+      //await this.client.close();
     }
   }
 
   async getLatestArticles() {
-    await this.client.connect();
+   // await this.client.connect();
     try {
-      return await this.database
-          .collection("article")
-          .find({})
-          .toArray();
+        const articles = await this.database
+        .collection("article")
+        .find({})
+        .toArray();
+  
+      const updatedArticles = articles.map(article => ({
+        ...article,
+        article_id: article._id.toString() // Convert ObjectId to string
+      }));
+  
+      return updatedArticles;
     } catch (error) {
       console.error("Error retrieving articles:", error);
       throw error;
     }
     finally
     {
-      await this.client.close();
+      //await this.client.close();
     }
   }
 
   async insertArticle(title, subtitle, article_content, journalist_id) {
     try {
+        console.log("journalist: ",journalist_id);
       const journalist = await this.database.collection("journalist").findOne({
-        _id: journalistId,
+        "user._id": new ObjectId(journalist_id), //todo journalist_id nehmen
       });
+      console.log("journalist: ",journalist_id);
 
       const article = {
         title: title,
         subtitle: subtitle,
         article_content: article_content,
-        journalist: journalist,
+        journalist: {
+          _id: journalist._id,
+          first_name: journalist.first_name,
+          last_name: journalist.last_name,
+        },
         publish_time: new Date(),
         categories: [],
         comments: [],
@@ -58,6 +72,7 @@ class MongoDbService {
       const result = await this.database
         .collection("article")
         .insertOne(article);
+
       return result.insertedId;
     } catch (error) {
       console.error("Error inserting article:", error);
@@ -75,9 +90,9 @@ class MongoDbService {
         },
       };
 
-      const result = await db
+      const result = await this.database
         .collection("article")
-        .updateOne({ _id: ObjectId(articleId) }, update);
+        .updateOne({ _id: new ObjectId(articleId) }, update);
 
       return result.modifiedCount;
     } catch (error) {
@@ -86,13 +101,45 @@ class MongoDbService {
     }
   }
 
-  async getUsers() {
-    return [];
+  async deleteArticle(articleId) {
+    try {
+      const result = await this.database.collection("article").deleteOne({
+        _id: new ObjectId(articleId),
+      });
+  
+      return result.deletedCount;
+    } catch (error) {
+      console.error("Error deleting article:", error);
+      throw error;
+    }
   }
 
-  async getCommentsOfArticle(articleId) {
-    return [];
-  }
+async getUsers() {
+    try {
+        const users = await this.database
+        .collection("user")
+        .find({})
+        .project({ _id: 1, username: 1 })
+        .toArray();
+
+        const journalistUserIds = await this.database
+            .collection("journalist")
+            .distinct("user._id");
+
+        const updatedUsers = users.map(({ _id, ...user }) => {
+            const isJournalist = journalistUserIds.some(journalistId => journalistId.toString() === _id.toString());
+            return {
+                ...user,
+                user_id: _id,
+                isJournalist,
+            };
+            });
+        return updatedUsers;
+    } catch (error) {
+        console.error("Error retrieving users:", error);
+        throw error;
+    }
+}
 
   async insertComment(article_id, user_id, comment_content) {}
 

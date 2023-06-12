@@ -10,14 +10,14 @@ import ArticleContainer from "../components/ArticleContainer";
 
 const ArticleDetails = () => {
     const location = useLocation();
-    const articleId = Number(location.pathname.split("/")[2]);
+    const articleId = location.pathname.split("/")[2];
     const [article, setSelectedArticle] = useState(null);
 
     useEffect(() => {
         const fetchArticle = async () => {
           try {
             const res = await axios.get(ARTICLES_LINK);
-            const selected = res.data.find((article) => article.article_id === articleId);
+            const selected = res.data.find((article) => article.article_id.toString() === articleId);
             setSelectedArticle(selected);
           } catch (error) {
             console.log(error);
