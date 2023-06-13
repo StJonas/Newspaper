@@ -13,7 +13,7 @@ const CommentSection = ({articleId}) => {
             const response = await axios.get(COMMENTS_LINK + articleId);
             setComments(response.data);
         } catch (error) {
-            console.log(error);
+            console.log("Fetching comments error: ", error);
         }
     };
 

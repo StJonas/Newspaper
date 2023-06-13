@@ -141,11 +141,78 @@ async getUsers() {
     }
 }
 
-  async insertComment(article_id, user_id, comment_content) {}
+async getCommentsOfArticle(articleId) {
+    try {
+      const article = await this.database.collection("article").findOne({
+        _id: new ObjectId(articleId)
+      });
+  
+      if (!article) {
+        throw new Error("Article not found");
+      }
+  
+      const comments = article.comments || [];
+  
+      const commentList = comments.map((comment) => ({
+        article_id: articleId,
+        comment_id: comment._id,
+        user_id: comment.user._id,
+        username: comment.user.username,
+        comment_time: comment.comment_time,
+        comment_content: comment.comment_content
+      }));
+  
+      return commentList;
+    } catch (error) {
+      console.error("Error retrieving comments:", error);
+      throw error;
+    }
+  }
+
+async insertComment(article_id, user_id, comment_content) {
+    try {
+      if (!article_id || !user_id || !comment_content) {
+        throw new Error("Invalid input: input cannot be null or empty");
+      }
+
+      const user = await this.database
+            .collection("user")
+            .findOne({_id: new ObjectId("64876ff5aa899efc04a3d812")});
+  
+      const newComment = {
+        user: {
+          _id: new ObjectId(user._id),
+          username: user.username 
+        },
+        comment_content: comment_content,
+        comment_time: new Date()
+      };
+  
+      const articleFilter = { _id: new ObjectId(article_id) };
+      const update = { $push: { comments: newComment } };
+  
+      const result = await this.database.collection("article").updateOne(articleFilter, update);
+  
+      if (result.modifiedCount === 1) {
+        return {
+          message: 'Comment created successfully',
+          comment: newComment
+        };
+      } else {
+        throw new Error('Failed to insert comment');
+      }
+  
+    } catch (error) {
+      console.error("Error inserting comment:", error);
+      throw error;
+    }
+  }
 
   async getArticleReport() {
-    return [];
+    return[];
   }
+  
+  
 
   async getCategoryReport() {
     return [];
