@@ -57,12 +57,3 @@ const ReportJournalist = ({ classes }) => {
 };
 
 export default ReportJournalist;
-
-// This report lists all journalists who published articles within the last year and shows which
-// journalist had the most publications. It lists the journalists in descending order, sorted by the
-// number of published articles. Moreover, it gives an overview of all journalists who published
-// articles in that period.
-// ● Use entities: User, Journalists, Articles
-// ● Filtered by: date (last year)
-// ● Sorted by: Number of new articles
-// ● Columns: “Journalist name”, “Title of most recent article”, “Number of published articles”

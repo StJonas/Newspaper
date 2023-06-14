@@ -203,41 +203,40 @@ async insertComment(article_id, user_id, comment_content) {
 
   async getArticleReport() {
     try {
-        const oneYearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000); // One year ago
+        const oneYearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000); 
 
-          const journalistId = "64876ff5aa899efc04a3d876";
-
-
-          const journalists = await this.database
-              .collection("journalist")
-              .find({})
-              .toArray();
-
-
-          const mostActiveJournalists = await this.database
-              .collection("article")
-              .find({})
-              .sort({ publish_time: 1, })
-              .limit(10);
-
-        const report = await Promise.all(
-          journalists.map(async (journalist) => {
-            const recentArticle = await this.database
-              .collection("article")
-              .find({ publish_time: { $gte: oneYearAgo } })
-              .sort({ publish_time: 1 })
-              .limit(2);
-              console.log("recentArticle", recentArticle);
-            return {
-              employee_id: journalist.employee_id,
-              fullName: `${journalist.last_name} ${journalist.first_name}`,
-              publishedArticles: journalist.publishedArticles,
-              recentArticleTitle: recentArticle ? recentArticle.title : null,
-              username: journalist.user.username
-            };
-          })
-        );
-          return report;
+        const mostActiveJournalists = await this.database.collection("article").aggregate([
+            {
+                $sort: { "journalist._id": 1, publish_time: -1 }
+            },
+            {
+                $group: {
+                _id: "$journalist._id",
+                articles: { $push: "$$ROOT" }
+                }
+            },
+            {
+                $project: {
+                journalist_id: "$_id",
+                fullName: {
+                    $concat: [
+                      { $arrayElemAt: ["$articles.journalist.last_name", 0] },
+                      " ",
+                      { $arrayElemAt: ["$articles.journalist.first_name", 0] }
+                    ]
+                  },
+                publishedArticles: { $size: "$articles" },
+                recentArticleTitle: { $arrayElemAt: ["$articles.title", 0] }
+                }
+            },
+            {
+                $sort: { publishedArticles: -1 }
+            },
+            {
+                $limit: 10
+            }
+            ]).toArray();
+            return mostActiveJournalists;
       } catch (error) {
         console.error('Error retrieving article report:', error);
         throw error;
