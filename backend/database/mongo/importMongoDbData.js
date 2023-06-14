@@ -201,7 +201,6 @@ async function insertUserFollow(numberOfUserFollow, user, users) {
             updateUserPromises.push(updateUserPromise);
         }
 
-        // Wait for all user updates to complete
         await Promise.all(updateUserPromises);
 
         console.log(`${numberOfUserFollow} followings per user inserted successfully.`);

@@ -1,16 +1,24 @@
 import MySqlService from "./mysql/mySqlService.js";
 import MongoDbService from "./mongo/mongoDbService.js";
+import {migrateMySqlDataToMongoDb} from "./migrateMySqlDataToMongoDb.js";
 
 class DatabaseService {
     constructor() {
         this.currentDb = new MySqlService();
         this.dbIsMysql = true;
+        this.firstMigration = true;
     }
 
     async switchDb(){
         if(this.dbIsMysql) {
+            const oldDb = this.currentDb;
             this.currentDb = new MongoDbService();
             this.dbIsMysql = false;
+            if(this.firstMigration)
+            {
+                await migrateMySqlDataToMongoDb(oldDb.database, this.currentDb.database);
+                this.firstMigration = false;
+            }
             return {
                 message: "Switched to MongoDB"
             }
