@@ -6,36 +6,85 @@ export default function createDatabaseCon() {
         sequelize: getSequelize()
     };
     database['user'] = getUser(database['sequelize']);
-
     database['journalist'] = getJournalist(database['sequelize'], database['user']);
-    database['user'].hasOne(database['journalist'], { foreignKey: 'user_id' });
+    database['article'] = getArticle(database['sequelize'], database['journalist']);
+    database['comment'] = getComment(database['sequelize'], database['article'], database['user']);
+    database['category'] = getCategory(database['sequelize']);
+    database['article_category'] = getArticleCategory(database['sequelize'], database['article'], database['category']);
+    database['user_follow'] = getUserFollow(database['sequelize'], database['user']);
+
+    database['user'].hasMany(database['journalist'], { foreignKey: 'user_id' });
     database['journalist'].belongsTo(database['user'], { foreignKey: 'user_id' });
 
-    database['article'] = getArticle(database['sequelize'], database['journalist']);
-    database['journalist'].hasOne(database['article'], { foreignKey: 'journalist_id' });
+    database['journalist'].hasMany(database['article'], { foreignKey: 'journalist_id' });
+    database['article'].belongsTo(database['journalist'], { foreignKey: 'journalist_id' });
 
-    database['comment'] = getComment(database['sequelize'], database['article'], database['user']);
-    database['user'].hasOne(database['comment'], { foreignKey: 'user_id' });
-    database['comment'].belongsTo(database['user'], { foreignKey: 'user_id' });
-    database['article'].hasOne(database['comment'], { foreignKey: 'article_id' });
+    database['article'].hasMany(database['comment'], { foreignKey: 'article_id' });
     database['comment'].belongsTo(database['article'], { foreignKey: 'article_id' });
 
-    database['category'] = getCategory(database['sequelize']);
+    database['user'].hasMany(database['comment'], { foreignKey: 'user_id' });
+    database['comment'].belongsTo(database['user'], { foreignKey: 'user_id' });
 
-    database['article_category'] = getArticleCategory(database['sequelize'], database['article'], database['category']);
-    database['article'].hasOne(database['article_category'], { foreignKey: 'article_id' });
+    database['article'].belongsToMany(database['category'], {
+        through: database['article_category'],
+        foreignKey: 'article_id',
+        otherKey: 'category_id'
+    });
+
+    database['category'].belongsToMany(database['article'], {
+        through: database['article_category'],
+        foreignKey: 'category_id',
+        otherKey: 'article_id'
+    });
+
     database['article_category'].belongsTo(database['article'], { foreignKey: 'article_id' });
-    database['category'].hasOne(database['article_category'], { foreignKey: 'category_id' });
+    database['article'].hasMany(database['article_category'], { foreignKey: 'article_id' });
+
     database['article_category'].belongsTo(database['category'], { foreignKey: 'category_id' });
-    database['comment'].belongsTo(database['article_category'], { foreignKey: 'article_id' });
-    database['article_category'].hasMany(database['comment'], { foreignKey: 'article_id' });
+    database['category'].hasMany(database['article_category'], { foreignKey: 'category_id' });
 
+    //database['comment'].belongsTo(database['article_category'], { foreignKey: 'article_id' });
+    //database['article_category'].hasMany(database['comment'], { foreignKey: 'article_id' });
 
-    database['user_follow'] = getUserFollow(database['sequelize'], database['user']);
-    database['user'].hasOne(database['user_follow'], { foreignKey: 'user_id' });
+    database['user'].hasMany(database['user_follow'], { foreignKey: 'user_id' });
     database['user_follow'].belongsTo(database['user'], { foreignKey: 'followed_user' });
-    database['user'].hasOne(database['user_follow'], { foreignKey: 'user_id' });
+
+    database['user'].hasMany(database['user_follow'], { foreignKey: 'user_id' });
     database['user_follow'].belongsTo(database['user'], { foreignKey: 'following_user' });
+
+
+    // database['user'] = getUser(database['sequelize']);
+    //
+    // database['journalist'] = getJournalist(database['sequelize'], database['user']);
+    // database['user'].hasOne(database['journalist'], { foreignKey: 'user_id' });
+    // database['journalist'].belongsTo(database['user'], { foreignKey: 'user_id' });
+    //
+    // database['article'] = getArticle(database['sequelize'], database['journalist']);
+    // database['journalist'].hasOne(database['article'], { foreignKey: 'journalist_id' });
+    // database['article'].belongsTo(database['journalist'], { foreignKey: 'employee_id' });
+    //
+    // database['comment'] = getComment(database['sequelize'], database['article'], database['user']);
+    // database['user'].hasOne(database['comment'], { foreignKey: 'user_id' });
+    // database['comment'].belongsTo(database['user'], { foreignKey: 'user_id' });
+    // database['article'].hasOne(database['comment'], { foreignKey: 'article_id' });
+    // database['comment'].belongsTo(database['article'], { foreignKey: 'article_id' });
+    //
+    // database['category'] = getCategory(database['sequelize']);
+    //
+    // database['article_category'] = getArticleCategory(database['sequelize'], database['article'], database['category']);
+    // database['article'].hasOne(database['article_category'], { foreignKey: 'article_id' });
+    // database['article_category'].belongsTo(database['article'], { foreignKey: 'article_id' });
+    // database['category'].hasOne(database['article_category'], { foreignKey: 'category_id' });
+    // database['article_category'].belongsTo(database['category'], { foreignKey: 'category_id' });
+    // database['comment'].belongsTo(database['article_category'], { foreignKey: 'article_id' });
+    // database['article_category'].hasMany(database['comment'], { foreignKey: 'article_id' });
+    //
+    //
+    // database['user_follow'] = getUserFollow(database['sequelize'], database['user']);
+    // database['user'].hasOne(database['user_follow'], { foreignKey: 'user_id' });
+    // database['user_follow'].belongsTo(database['user'], { foreignKey: 'followed_user' });
+    // database['user'].hasOne(database['user_follow'], { foreignKey: 'user_id' });
+    // database['user_follow'].belongsTo(database['user'], { foreignKey: 'following_user' });
 
     return database;
 }

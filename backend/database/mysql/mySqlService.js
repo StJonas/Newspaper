@@ -20,6 +20,7 @@ class MySqlService {
 
     async getLatestArticles() {
         return await this.database['article'].findAll({
+            attributes: [`article_id`, `journalist_id`, `publish_time`, `title`, `subtitle`, `article_content`],
             order: [['publish_time', 'DESC']],
             limit: 50
         });
@@ -91,17 +92,21 @@ class MySqlService {
                     'user_id',
                     'username',
                     [
-                        Sequelize.literal('CASE WHEN journalist.user_id IS NOT NULL THEN TRUE ELSE FALSE END'),
+                        Sequelize.literal('CASE WHEN journalists.user_id IS NOT NULL THEN TRUE ELSE FALSE END'),
                         'isJournalist'
                     ]
                 ],
                 include: [
                     {
                         model: this.database.journalist,
-                        as: 'journalist',
+                        as: 'journalists',
                         attributes: []
                     }
-                ]
+                ],
+                order: [
+                    [Sequelize.literal('CASE WHEN journalists.user_id IS NOT NULL THEN 0 ELSE 1 END')],
+                    ['username']
+                ],
             });
         } catch (error) {
             console.error("Error retrieving users:", error);
