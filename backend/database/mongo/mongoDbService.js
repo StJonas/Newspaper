@@ -30,7 +30,7 @@ class MongoDbService {
 
             const updatedArticles = articles.map(article => ({
                 ...article,
-                article_id: article._id.toString() // Convert ObjectId to string
+                article_id: article._id.toString() // ObjectID has to be converted to String
             }));
 
             return updatedArticles;
@@ -42,12 +42,10 @@ class MongoDbService {
 
     async insertArticle(title, subtitle, article_content, journalist_id) {
         try {
-            console.log("journalist: ", journalist_id);
             const journalist = await this.database.collection("journalist").findOne({
                 "user._id": new ObjectId(journalist_id), //todo journalist_id nehmen
             });
-            console.log("journalist: ", journalist_id);
-
+            
             const article = {
                 title: title,
                 subtitle: subtitle,
@@ -119,13 +117,23 @@ class MongoDbService {
                 .collection("journalist")
                 .distinct("user._id");
 
-            const updatedUsers = users.map(({_id, ...user}) => {
+            var updatedUsers = users.map(({_id, ...user}) => {
                 const isJournalist = journalistUserIds.some(journalistId => journalistId.toString() === _id.toString());
                 return {
                     ...user,
                     user_id: _id,
-                    isJournalist,
+                    isJournalist: isJournalist ? 1 : 0, 
                 };
+            });
+
+            updatedUsers.sort((a, b) => {
+                if (a.isJournalist && !b.isJournalist) {
+                    return -1; // a is journalist, b is not, so a comes first
+                } else if (!a.isJournalist && b.isJournalist) {
+                    return 1; // b is journalist, a is not, so b comes first
+                } else {
+                    return a.username.localeCompare(b.username); // both are either journalists or non-journalists, order by username
+                }
             });
             return updatedUsers;
         } catch (error) {
@@ -137,13 +145,12 @@ class MongoDbService {
     async getCommentsOfArticle(articleId) {
         try {
             const article = await this.database.collection("article").findOne({
-                _id: new ObjectId(articleId)
+                _id: new ObjectId(articleId),
             });
 
             if (!article) {
                 throw new Error("Article not found");
             }
-
             const comments = article.comments || [];
 
             const commentList = comments.map((comment) => ({
@@ -170,7 +177,7 @@ class MongoDbService {
 
             const user = await this.database
                 .collection("user")
-                .findOne({_id: new ObjectId("64876ff5aa899efc04a3d812")});
+                .findOne({_id: new ObjectId(user_id)});
 
             const newComment = {
                 user: {
