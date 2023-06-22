@@ -19,7 +19,6 @@ const Articles = () => {
     const [dialogIsOpen, setDialogIsOpen] = useState(false);
     const [dialogMessage, setDialogMessage] = useState("Something went wrong!");
     
-
     useEffect(() => {
         const fetchAllArticles = async () => {
             try {
@@ -37,6 +36,7 @@ const Articles = () => {
             await axios.delete(ARTICLES_LINK + article_id);
             setDialogMessage("Successfully deleted!");
             setDialogIsOpen(true);
+            setArticles(prevArticles => prevArticles.filter(article => article.article_id !== article_id));
         } catch (error) {
             setDialogMessage("Error while deleting!");
             setDialogIsOpen(true);
@@ -50,7 +50,6 @@ const Articles = () => {
 
     const closeDialog = ()=>{
         setDialogIsOpen(false);
-        window.location.reload();
     };
 
     return (
