@@ -30,7 +30,7 @@ class MongoDbService {
 
             const updatedArticles = articles.map(article => ({
                 ...article,
-                article_id: article._id.toString() // ObjectID has to be converted to String
+                article_id: article._id.toString() 
             }));
 
             return updatedArticles;
