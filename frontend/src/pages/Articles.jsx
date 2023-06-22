@@ -9,10 +9,12 @@ import UpdateButton from "../components/UpdateButton";
 import DeleteButton from "../components/DeleteButton";
 import {H2, H3} from "../components/Typography";
 import ArticleContainer from "../components/ArticleContainer";
+import { useSelector } from 'react-redux';
 
 const Articles = () => {
     const navigate = useNavigate();
     const [articles, setArticles] = useState([]);
+    const loggedInUser = useSelector((state) => state.loggedInUser);
 
     useEffect(() => {
         const fetchAllArticles = async () => {
@@ -51,11 +53,16 @@ const Articles = () => {
                     <H3>{article['subtitle']}</H3>
                     <span>{article['publish_time']}</span>
                     <p>{article['article_content']}</p>
-                    <div>
-                        <UpdateButton
+                    {loggedInUser.isJournalist ? (
+                        <div>
+                            <UpdateButton
                             onClick={() => navigateTo(`/update/${article['article_id']}`)}>Update</UpdateButton>
-                        <DeleteButton onClick={() => handleClickDelete(article['article_id'])}>Delete</DeleteButton>
-                    </div>
+                        
+                            <DeleteButton onClick={() => handleClickDelete(article['article_id'])}>Delete</DeleteButton>
+                        </div>
+                    ) : (
+                        <div></div>
+                    )}
                 </ArticleContainer>
             ))}</div>
             <br/>
