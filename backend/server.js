@@ -137,7 +137,7 @@ app.post("/comments", async (req, res) => {
 
 app.get("/articleReport", async (req, res) => {
   try {
-    const results = await database.getArticleReport();
+    const results = await database.getJournalistReport();
     return res.json(results);
   } catch (error) {
     return res.status(500).json({ error: "Error retrieving article report" });
@@ -165,7 +165,3 @@ app.put("/switchDatabase", async (req, res) => {
 
 //TODO: Login ListBox is under Report table. it should be above it
 //TODO: Check what is wrong with update fields
-//TODO: HealthChecks for Database
-//TODO: user drop down takes ages to load
-//TODO: remove dev env settings
-//TODO: Automatically restart when container crashes

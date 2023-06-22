@@ -208,18 +208,34 @@ class MongoDbService {
         }
     }
 
-    async getArticleReport() {
+    async getJournalistReport() {
         try {
             const oneYearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000);
-
             const mostActiveJournalists = await this.database.collection("article").aggregate([
                 {
-                    $sort: {"journalist._id": 1, publish_time: -1}
+                    $match: {
+                        publish_time: { $gte: oneYearAgo }
+                    }
+                },
+                {
+                    $sort: {
+                        publish_time: -1
+                    }
                 },
                 {
                     $group: {
                         _id: "$journalist._id",
-                        articles: {$push: "$$ROOT"}
+                        articles: { $push: "$$ROOT" },
+                        publishedArticles: { $sum: 1 },
+                        recentArticleTitle: { $first: "$title" }
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "journalist",
+                        localField: "_id",
+                        foreignField: "_id",
+                        as: "journalist"
                     }
                 },
                 {
@@ -227,23 +243,28 @@ class MongoDbService {
                         journalist_id: "$_id",
                         fullName: {
                             $concat: [
-                                {$arrayElemAt: ["$articles.journalist.last_name", 0]},
+                                { $arrayElemAt: ["$journalist.last_name", 0] },
                                 " ",
-                                {$arrayElemAt: ["$articles.journalist.first_name", 0]}
+                                { $arrayElemAt: ["$journalist.first_name", 0] }
                             ]
                         },
-                        publishedArticles: {$size: "$articles"},
-                        recentArticleTitle: {$arrayElemAt: ["$articles.title", 0]}
+                        publishedArticles: 1,
+                        recentArticleTitle: 1
                     }
                 },
                 {
-                    $sort: {publishedArticles: -1}
+                    $sort: {
+                        publishedArticles: -1,
+                        fullName: 1
+                    }
                 },
                 {
                     $limit: 10
                 }
             ]).toArray();
+
             return mostActiveJournalists;
+
         } catch (error) {
             console.error('Error retrieving article report:', error);
             throw error;
@@ -268,16 +289,23 @@ class MongoDbService {
                     $project: {
                         _id: 0,
                         label: "$_id",
-                        avgNumOfCmt: {$divide: ["$totalComments", "$totalArticles"]}
+                        avgNumOfCmt: {
+                            $round: [{ $divide: ["$totalComments", "$totalArticles"] },5]
+                        }
                     }
                 },
                 {
                     $sort: {
-                        avgNumOfCmt: -1
+                        avgNumOfCmt: -1,
+                        label: 1
                     }
                 }
             ]).toArray();
-            return result;
+
+            return result.map(item => {
+                item.avgNumOfCmt = item.avgNumOfCmt.toFixed(5);
+                return item;
+            });
         } catch (error) {
             console.error("Error retrieving category report: " + error);
             throw error;

@@ -65,8 +65,8 @@ class DatabaseService {
         return await this.currentDb.insertComment(article_id, user_id, comment_content);
     }
 
-    async getArticleReport() {
-        return this.currentDb.getArticleReport();
+    async getJournalistReport() {
+        return this.currentDb.getJournalistReport();
     }
 
     async getCategoryReport() {
