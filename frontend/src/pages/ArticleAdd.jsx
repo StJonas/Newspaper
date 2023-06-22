@@ -1,6 +1,6 @@
 import axios from 'axios';
 import React from 'react';
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {useSelector} from "react-redux";
 import {useNavigate} from 'react-router-dom';
 import {ARTICLES_LINK} from "../assets/constants";
@@ -20,6 +20,7 @@ const ArticleAdd = () => {
     const [journalistId, setJournalist] = useState(null);
     const [dialogIsOpen, setDialogIsOpen] = useState(false);
     const [dialogMessage, setDialogMessage] = useState("Something went wrong!");
+    var shouldNavigate = useRef(false); 
 
     const navigate = useNavigate();
 
@@ -34,6 +35,12 @@ const ArticleAdd = () => {
     }, [loggedInUser]);
 
     const createArticle = async () => {
+        if (!article.title || !article.subtitle || !article.article_content) {
+            setDialogMessage("Please fill in all fields.");
+            setDialogIsOpen(true);
+            return;
+          }
+
         const articleData = {
             ...article,
             journalist_id: journalistId
@@ -42,6 +49,7 @@ const ArticleAdd = () => {
         await axios.post(ARTICLES_LINK, articleData).then(
             (value) => {
                 setDialogMessage("Successfully created!");
+                shouldNavigate.current = true;
                 setDialogIsOpen(true);
             },
             (error) => {
@@ -53,8 +61,11 @@ const ArticleAdd = () => {
 
     const closeDialog = ()=>{
         setDialogIsOpen(false);
-        navigate("/");
+        if (shouldNavigate.current) {
+            navigate("/");
+          }
     };
+
 
     return (
         <AppContainer classes={"flex flex-col gap-10"}>
