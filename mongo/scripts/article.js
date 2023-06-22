@@ -95,3 +95,5 @@ db.createCollection("article", {
 });
 
 db.article.createIndex({ title: 1 });
+db.article.createIndex({ publish_time: 1, "categories.label": 1 });
+db.article.createIndex({ "journalist.first_name": 1, "journalist.last_name": 1 });

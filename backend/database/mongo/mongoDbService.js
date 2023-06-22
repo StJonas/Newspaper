@@ -271,7 +271,6 @@ class MongoDbService {
         }
     }
 
-
     async getCategoryReport() {
         try {
             const result = await this.database.collection('article').aggregate([
