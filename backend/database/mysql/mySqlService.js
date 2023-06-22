@@ -26,11 +26,11 @@ class MySqlService {
         });
     }
 
-    async insertArticle(title, subtitle, article_content, journalist_id) {
+    async insertArticle(title, subtitle, article_content, user_id) {
         try {
             const journalist = await this.database.journalist.findOne({
                 where: {
-                    user_id: journalist_id,
+                    user_id: user_id,
                 },
             });
 

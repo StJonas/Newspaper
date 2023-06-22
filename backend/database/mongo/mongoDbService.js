@@ -40,10 +40,10 @@ class MongoDbService {
         }
     }
 
-    async insertArticle(title, subtitle, article_content, journalist_id) {
+    async insertArticle(title, subtitle, article_content, user_id) {
         try {
             const journalist = await this.database.collection("journalist").findOne({
-                "user._id": new ObjectId(journalist_id), //todo journalist_id nehmen
+                "user._id": new ObjectId(user_id), 
             });
             
             const article = {
