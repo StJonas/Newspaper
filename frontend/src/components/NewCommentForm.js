@@ -63,7 +63,7 @@ const NewCommentForm = ({article_id, reloadComments}) => {
                 value={comment.comment_content}
                 onChange={handleChange}
             />
-            <Button color="dark" className={"mt-1"} disabled={loggedInUser.user_id === null} onClick={makeComment}>
+            <Button color="dark" className={"mt-1"} disabled={loggedInUser.user_id === null || comment.comment_content === "" || comment.comment_content === null} onClick={makeComment}>
                 Comment
             </Button>
         </div>
