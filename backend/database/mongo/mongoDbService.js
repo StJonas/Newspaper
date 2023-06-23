@@ -273,14 +273,14 @@ class MongoDbService {
                 },
                 {
                     $group: {
-                        _label: "$categories.label",
+                        _id: "$categories.label",
                         totalArticles: {$sum: 1},
                         totalComments: {$sum: {$size: "$comments"}}
                     }
                 },
                 {
                     $project: {
-                        label: "$_label",
+                        label: "$_id",
                         avgNumOfCmt: { $divide: ["$totalComments", "$totalArticles"] }
                     }
                 },
