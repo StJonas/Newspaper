@@ -162,6 +162,3 @@ app.put("/switchDatabase", async (req, res) => {
     return res.status(500).json({ error: "Failed switching db" });
   }
 });
-
-//TODO: Login ListBox is under Report table. it should be above it
-//TODO: Check what is wrong with update fields
