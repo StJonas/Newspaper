@@ -225,17 +225,11 @@ class MongoDbService {
                 {
                     $group: {
                         _id: "$journalist._id",
+                        first_name: { $first: "$journalist.first_name" },
+                        last_name: { $first: "$journalist.last_name" },
                         articles: { $push: "$$ROOT" },
                         publishedArticles: { $sum: 1 },
                         recentArticleTitle: { $first: "$title" }
-                    }
-                },
-                {
-                    $lookup: {
-                        from: "journalist",
-                        localField: "_id",
-                        foreignField: "_id",
-                        as: "journalist"
                     }
                 },
                 {
@@ -243,9 +237,9 @@ class MongoDbService {
                         journalist_id: "$_id",
                         fullName: {
                             $concat: [
-                                { $arrayElemAt: ["$journalist.last_name", 0] },
+                                "$last_name",
                                 " ",
-                                { $arrayElemAt: ["$journalist.first_name", 0] }
+                                "$first_name"
                             ]
                         },
                         publishedArticles: 1,
@@ -288,9 +282,7 @@ class MongoDbService {
                     $project: {
                         _id: 0,
                         label: "$_id",
-                        avgNumOfCmt: {
-                            $round: [{ $divide: ["$totalComments", "$totalArticles"] },5]
-                        }
+                        avgNumOfCmt: { $divide: ["$totalComments", "$totalArticles"] }
                     }
                 },
                 {
