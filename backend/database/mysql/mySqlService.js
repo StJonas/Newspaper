@@ -29,6 +29,7 @@ class MySqlService {
     async insertArticle(title, subtitle, article_content, user_id) {
         try {
             const journalist = await this.database.journalist.findOne({
+                attributes:["employee_id"],
                 where: {
                     user_id: user_id,
                 },
