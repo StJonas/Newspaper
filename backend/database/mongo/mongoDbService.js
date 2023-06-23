@@ -40,36 +40,36 @@ class MongoDbService {
         }
     }
 
-async insertArticle(title, subtitle, article_content, user_id) {
-    try {
-        const journalist = await this.database.collection("journalist").findOne({
-            "user._id": new ObjectId(user_id), 
-        });
-        
-        const article = {
-            title: title,
-            subtitle: subtitle,
-            article_content: article_content,
-            journalist: {
-                _id: journalist._id,
-                first_name: journalist.first_name,
-                last_name: journalist.last_name,
-            },
-            publish_time: new Date(),
-            categories: [],
-            comments: [],
-        };
+    async insertArticle(title, subtitle, article_content, user_id) {
+        try {
+            const journalist = await this.database.collection("journalist").findOne({
+                "user._id": new ObjectId(user_id),
+            });
 
-        const result = await this.database
-            .collection("article")
-            .insertOne(article);
+            const article = {
+                title: title,
+                subtitle: subtitle,
+                article_content: article_content,
+                journalist: {
+                    _id: journalist._id,
+                    first_name: journalist.first_name,
+                    last_name: journalist.last_name,
+                },
+                publish_time: new Date(),
+                categories: [],
+                comments: [],
+            };
 
-        return result.insertedId;
-    } catch (error) {
-        console.error("Error inserting article:", error);
-        throw error;
+            const result = await this.database
+                .collection("article")
+                .insertOne(article);
+
+            return result.insertedId;
+        } catch (error) {
+            console.error("Error inserting article:", error);
+            throw error;
+        }
     }
-}
 
     async updateArticle(articleId, title, subtitle, article_content) {
         try {
@@ -162,51 +162,56 @@ async insertArticle(title, subtitle, article_content, user_id) {
                 comment_content: comment.comment_content
             }));
 
-            return commentList;
+            const reversedCommentList = commentList.reverse();
+
+            return reversedCommentList;
         } catch (error) {
             console.error("Error retrieving comments:", error);
             throw error;
         }
     }
 
-async insertComment(article_id, user_id, comment_content) {
-    try {
-        if (!article_id || !user_id || !comment_content) {
-            throw new Error("Invalid input: input cannot be null or empty");
-        }
+    async insertComment(article_id, user_id, comment_content) {
+        try {
+            console.log(article_id, user_id, comment_content);
 
-        const user = await this.database
-            .collection("user")
-            .findOne({_id: new ObjectId(user_id)});
+            if (!article_id || !user_id || !comment_content) {
+                throw new Error("Invalid input: input cannot be null or empty");
+            }
 
-        const newComment = {
-            user: {
-                _id: new ObjectId(user._id),
-                username: user.username
-            },
-            comment_content: comment_content,
-            comment_time: new Date()
-        };
+            const user = await this.database
+                .collection("user")
+                .findOne({_id: new ObjectId(user_id)});
 
-        const articleFilter = {_id: new ObjectId(article_id)};
-        const update = {$push: {comments: newComment}};
-
-        const result = await this.database.collection("article").updateOne(articleFilter, update);
-
-        if (result.modifiedCount === 1) {
-            return {
-                message: 'Comment created successfully',
-                comment: newComment
+            const newComment = {
+                user: {
+                    _id: user._id,
+                    username: user.username
+                },
+                comment_content: comment_content,
+                comment_time: new Date()
             };
-        } else {
-            throw new Error('Failed to insert comment');
-        }
 
-    } catch (error) {
-        console.error("Error inserting comment:", error);
-        throw error;
+            const articleFilter = {_id: new ObjectId(article_id)};
+            const update = {$push: {comments: newComment}};
+
+            const result = await this.database.collection("article").updateOne(articleFilter, update);
+
+            if (result.modifiedCount === 1) {
+                return {
+                    message: 'Comment created successfully',
+                    comment: newComment
+                };
+            } else {
+                throw new Error('Failed to insert comment');
+            }
+
+
+        } catch (error) {
+            console.error("Error inserting comment:", error);
+            throw error;
+        }
     }
-}
 
     async getJournalistReport() {
         try {
