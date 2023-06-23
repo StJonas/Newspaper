@@ -188,13 +188,6 @@ class MySqlService {
                         'recentArticleTitle',
                     ]
                 ],
-                include: [
-                    {
-                        model: this.database.user,
-                        as: 'user',
-                        attributes: ['username']
-                    }
-                ],
                 order: [
                     [Sequelize.literal('publishedArticles'), 'DESC'],
                     [Sequelize.literal('last_name'), 'ASC'],
